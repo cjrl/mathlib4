@@ -8,6 +8,8 @@ import Mathlib.Data.Finset.Image
 import Mathlib.Data.Finset.Card
 import Mathlib.Data.Finset.Defs
 import Mathlib.Data.Fintype.Basic
+import Mathlib.Tactic.Group
+import Mathlib.Algebra.Group.Defs
 
 /-! 
 # LatinSquare
@@ -65,7 +67,7 @@ class LatinRectangle (m n : Nat) (α : Type u) [DecidableEq α] where
   once_per_row : once_per_row M
   /-- Entries cannot repeat in a given column. -/
   distinct_col_entries : distinct_col_entries M
-  m_le_n : m ≤ n := by decide
+  m_le_n : m ≤ n := by simp
 
 -- Pretty printing of rectangles
 instance {m n : Nat} {α : Type u} [DecidableEq α] [ToString α] :
@@ -100,7 +102,55 @@ class LatinSquare (n : Nat) (α : Type u) [DecidableEq α] extends LatinRectangl
   /-- If each column contains each symbol exactly once, then there are no repeats across columns. -/
   distinct_col_entries := latin_square_col_implies_latin_rectangle_col 
     M exactly_n_symbols once_per_column
+  m_le_n := by rfl
 
+/-- Every Finite Group's Cayley table is an example of a Latin Square. -/
+
+def group_to_cayley_table {G : Type*} [DecidableEq G] [Group G] [Fintype G]
+  (ordering : Fin (Fintype.card G) ≃ G) : 
+  LatinSquare (Fintype.card G) G := {
+    M := fun i j ↦ (ordering i) * (ordering j),
+    exactly_n_symbols := by 
+      simp [exactly_n_symbols,symbols]
+      congr
+      ext a
+      constructor 
+      · simp
+      · intro h
+        rw [Finset.mem_image]
+        set i' := ordering.symm a
+        set j' := ordering.symm 1
+        use (i',j')
+        simp [i', j']
+    once_per_row := by 
+      simp [once_per_row]
+      intro i g x y z
+      set g' := ordering i
+      set j := ordering.symm (g'⁻¹*g)
+      use j
+      simp [g',j]
+      intro k h 
+      have hia : (ordering i)⁻¹ * ((ordering i) * (ordering k)) = (ordering i)⁻¹ * g := by
+       rw [mul_right_inj (ordering i)⁻¹ (b := (ordering i)*(ordering k)) (c := g)]
+       exact h
+      simp at hia
+      rw [<- hia]
+      simp
+    once_per_column := by 
+      simp [once_per_column]
+      intro i g x y z
+      set g' := ordering i
+      set j := ordering.symm (g*g'⁻¹)
+      use j
+      simp [g',j]
+      intro k h 
+      have hia : (ordering k) * (ordering i) * (ordering i)⁻¹ = g * (ordering i)⁻¹  := by
+       rw [mul_left_inj (ordering i)⁻¹ (b := (ordering k)*(ordering i)) (c := g)]
+       exact h
+      simp at hia
+      rw [<- hia]
+      simp
+  }
 
 section Isotopy
 
