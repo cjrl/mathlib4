@@ -10,6 +10,10 @@ import Mathlib.Data.Finset.Defs
 import Mathlib.Data.Fintype.Basic
 import Mathlib.Tactic.Group
 import Mathlib.Algebra.Group.Defs
+import Mathlib.Data.ZMod.Basic
+import Mathlib.GroupTheory.SpecificGroups.Cyclic
+import Mathlib.Algebra.Group.Fin.Basic
+import Mathlib.Data.ZMod.Basic
 
 /-! 
 # LatinSquare
@@ -104,6 +108,9 @@ class LatinSquare (n : Nat) (α : Type u) [DecidableEq α] extends LatinRectangl
     M exactly_n_symbols once_per_column
   m_le_n := by rfl
 
+instance {n : Nat} {α : Type*} [DecidableEq α] [ToString α] :
+  Repr (LatinSquare n α) where
+    reprPrec L prec := Repr.reprPrec L.toLatinRectangle prec
 /-- Every Finite Group's Cayley table is an example of a Latin Square. -/
 
 def group_to_cayley_table {G : Type*} [DecidableEq G] [Group G] [Fintype G]
@@ -151,6 +158,25 @@ def group_to_cayley_table {G : Type*} [DecidableEq G] [Group G] [Fintype G]
       rw [<- hia]
       simp
   }
+
+-- Cyclic Example
+-- We construct an infinite family of Latin Squares from the infinite family of Cyclic Groups
+
+def enumerate_cyclic_group (n : Nat) [NeZero n] : 
+  (Fin (Fintype.card (Multiplicative (ZMod n)))) ≃ Multiplicative (ZMod n) :=
+  let f' := (ZMod.finEquiv n).toEquiv 
+  let mcast :=  Equiv.cast (by rfl : ZMod n = Multiplicative (ZMod n))
+  have h : (Fintype.card (Multiplicative (ZMod n)) = n) := by simp
+  have pre := Equiv.cast (congrArg Fin h)
+  (pre.trans f').trans mcast
+
+#eval! group_to_cayley_table (enumerate_cyclic_group 10)
+
+-- instance inhabited {n : Nat} [NeZero n] : LatinSquare n (Multiplicative (ZMod n)) :=
+--   let f' := group_to_cayley_table (enumerate_cyclic_group n)
+--   have h : (Fintype.card (Multiplicative (ZMod n)) = n) := by simp
+--   cast (by rw [← h]) f'
+
 
 section Isotopy
 
