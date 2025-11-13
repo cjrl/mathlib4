@@ -14,6 +14,7 @@ import Mathlib.Data.ZMod.Basic
 import Mathlib.GroupTheory.SpecificGroups.Cyclic
 import Mathlib.Algebra.Group.Fin.Basic
 import Mathlib.Data.ZMod.Basic
+import Mathlib.Combinatorics.Hall.Basic
 
 /-! 
 # LatinSquare
@@ -196,5 +197,24 @@ def reflLatinSquareIsotopy {n : Nat} {α : Type u} [DecidableEq α] [Nonempty α
   }
 
 end Isotopy
+
+section Completion 
+
+def is_subrect {m n m' n' : Nat}
+  (A : LatinRectangle m n α)
+  (B : LatinRectangle m' n' α)
+  (h₁ : m ≤ m' := by omega)
+  (h₂ : n ≤ n' := by omega) := 
+  ∀ (i : Fin m), ∀ (j : Fin n), A.M i j = B.M ⟨i, by omega⟩ ⟨j, by omega⟩ 
+ 
+theorem latin_rectangle_extends
+  {k n : Nat} [NeZero k] [NeZero n]
+  (A : LatinRectangle k n α)
+  (h : k < n := by omega) :
+  ∃ (A' : LatinRectangle (k + 1) n α), is_subrect A A' := by 
+  -- #check hallMatchingsOn.nonempty
+  sorry
+
+end Completion
 
 end LatinSquare
