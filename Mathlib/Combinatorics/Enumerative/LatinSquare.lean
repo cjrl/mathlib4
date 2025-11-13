@@ -113,17 +113,23 @@ instance {n : Nat} {α : Type*} [DecidableEq α] [ToString α] :
     reprPrec L prec := Repr.reprPrec L.toLatinRectangle prec
 /-- Every Finite Group's Cayley table is an example of a Latin Square. -/
 
+@[to_additive]
 def group_to_cayley_table {G : Type*} [DecidableEq G] [Group G] [Fintype G]
-  (ordering : Fin (Fintype.card G) ≃ G) : 
-  LatinSquare (Fintype.card G) G := {
+  {n : Nat} [NeZero n]
+  (ordering : Fin n ≃ G)
+  (h : n = Fintype.card G := by simp) :
+  LatinSquare n G := {
     M := fun i j ↦ (ordering i) * (ordering j),
     exactly_n_symbols := by 
       simp [exactly_n_symbols,symbols]
+      conv =>
+        rhs
+        rw [h]
       congr
       ext a
       constructor 
       · simp
-      · intro h
+      · intro h'
         rw [Finset.mem_image]
         set i' := ordering.symm a
         set j' := ordering.symm 1
@@ -136,10 +142,10 @@ def group_to_cayley_table {G : Type*} [DecidableEq G] [Group G] [Fintype G]
       set j := ordering.symm (g'⁻¹*g)
       use j
       simp [g',j]
-      intro k h 
+      intro k h' 
       have hia : (ordering i)⁻¹ * ((ordering i) * (ordering k)) = (ordering i)⁻¹ * g := by
        rw [mul_right_inj (ordering i)⁻¹ (b := (ordering i)*(ordering k)) (c := g)]
-       exact h
+       exact h'
       simp at hia
       rw [<- hia]
       simp
@@ -150,10 +156,10 @@ def group_to_cayley_table {G : Type*} [DecidableEq G] [Group G] [Fintype G]
       set j := ordering.symm (g*g'⁻¹)
       use j
       simp [g',j]
-      intro k h 
+      intro k h' 
       have hia : (ordering k) * (ordering i) * (ordering i)⁻¹ = g * (ordering i)⁻¹  := by
        rw [mul_left_inj (ordering i)⁻¹ (b := (ordering k)*(ordering i)) (c := g)]
-       exact h
+       exact h'
       simp at hia
       rw [<- hia]
       simp
@@ -162,21 +168,10 @@ def group_to_cayley_table {G : Type*} [DecidableEq G] [Group G] [Fintype G]
 -- Cyclic Example
 -- We construct an infinite family of Latin Squares from the infinite family of Cyclic Groups
 
-def enumerate_cyclic_group (n : Nat) [NeZero n] : 
-  (Fin (Fintype.card (Multiplicative (ZMod n)))) ≃ Multiplicative (ZMod n) :=
-  let f' := (ZMod.finEquiv n).toEquiv 
-  let mcast :=  Equiv.cast (by rfl : ZMod n = Multiplicative (ZMod n))
-  have h : (Fintype.card (Multiplicative (ZMod n)) = n) := by simp
-  have pre := Equiv.cast (congrArg Fin h)
-  (pre.trans f').trans mcast
+-- For example, addGroup_to_cayley_table (ZMod.finEquiv 5).toEquiv
 
-#eval! group_to_cayley_table (enumerate_cyclic_group 10)
-
--- instance inhabited {n : Nat} [NeZero n] : LatinSquare n (Multiplicative (ZMod n)) :=
---   let f' := group_to_cayley_table (enumerate_cyclic_group n)
---   have h : (Fintype.card (Multiplicative (ZMod n)) = n) := by simp
---   cast (by rw [← h]) f'
-
+instance nonempty {n : Nat} [NeZero n] : LatinSquare n (ZMod n) :=
+  addGroup_to_cayley_table (ZMod.finEquiv n).toEquiv
 
 section Isotopy
 
