@@ -15,6 +15,7 @@ import Mathlib.GroupTheory.SpecificGroups.Cyclic
 import Mathlib.Algebra.Group.Fin.Basic
 import Mathlib.Data.ZMod.Basic
 import Mathlib.Combinatorics.Hall.Basic
+import Mathlib
 
 /-! 
 # LatinSquare
@@ -210,12 +211,34 @@ def is_subrect {m n m' n' : Nat}
   (h₂ : n ≤ n' := by omega) := 
   ∀ (i : Fin m), ∀ (j : Fin n), A.M i j = B.M ⟨i, by omega⟩ ⟨j, by omega⟩ 
  
+def symbols_not_in
+{k n : Nat} [NeZero k] [NeZero n]
+ (A : LatinRectangle k n α) (j : Fin n) :=
+  let D := Finset.image (fun i => A.M i j) Finset.univ
+  (symbols A.M) \ D
+
 theorem latin_rectangle_extends
   {k n : Nat} [NeZero k] [NeZero n]
-  (A : LatinRectangle k n α)
-  (h : k < n := by omega) :
-  ∃ (A' : LatinRectangle (k + 1) n α), is_subrect A A' := by 
-  -- #check hallMatchingsOn.nonempty
+    (A : LatinRectangle k n α)
+    (h : k < n := by omega) :
+    ∃ (A' : LatinRectangle (k + 1) n α), is_subrect A A' := by 
+  let B := symbols_not_in A
+  have h : ∀ (s : Finset (Fin n)), (Finset.card s) ≤ (Finset.card (s.biUnion B)) := sorry
+  let halls := hallMatchingsOn.nonempty (B) h (Finset.univ)
+  set f := Classical.choice halls with hx
+  simp [hallMatchingsOn] at f
+  obtain ⟨ f', hf⟩ := f
+  let M' : Fin (k+1) → (Fin n) → α := fun i j => 
+    if hif : i < k then A.M ⟨i, hif⟩ j else (f' ⟨j, by simp⟩ )
+  let A' : LatinRectangle (k+1) n α := {
+    M := M'
+    exactly_n_symbols := sorry
+    once_per_row := sorry
+    distinct_col_entries := sorry
+    m_le_n := by omega
+  }
+  use A'
+  -- TODO prove subrect
   sorry
 
 end Completion
