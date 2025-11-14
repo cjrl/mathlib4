@@ -27,7 +27,10 @@ Description of Latin Squares
 
 ## TODO
 
-* Add theorem that a k-1 × n Latin rectangle can be completed to a k × n Latin rectangle.
+* Add theorem that a k-1 × n Latin rectangle can be extended to a k × n Latin rectangle.
+* Corollary, any k x n Latin rectangle can be extneded to a Latin square.
+* Add that a n x n Latin rectangle is a Latin square. 
+  This will lead to a computable definition of Latin square.
 * Add Ryser's theorem using partial Latin squares.
 * Add Evan's Conjeture. 
 * Add isomorphism to quasigroups.
