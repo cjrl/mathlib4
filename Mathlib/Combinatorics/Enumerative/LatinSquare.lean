@@ -17,7 +17,7 @@ import Mathlib.Data.ZMod.Basic
 import Mathlib.Combinatorics.Hall.Basic
 import Mathlib
 
-/-! 
+/-!
 # LatinSquare
 
 Description of Latin Squares
@@ -30,10 +30,10 @@ Description of Latin Squares
 
 * Add theorem that a k-1 × n Latin rectangle can be extended to a k × n Latin rectangle.
 * Corollary, any k x n Latin rectangle can be extneded to a Latin square.
-* Add that a n x n Latin rectangle is a Latin square. 
+* Add that a n x n Latin rectangle is a Latin square.
   This will lead to a computable definition of Latin square.
 * Add Ryser's theorem using partial Latin squares.
-* Add Evan's Conjeture. 
+* Add Evan's Conjeture.
 * Add isomorphism to quasigroups.
 * Add isomorphism to orthogonal arrays of triples.
 
@@ -47,10 +47,10 @@ section LatinSquare
 
 universe u
 
-variable {α : Type u} [DecidableEq α] 
+variable {α : Type u} [DecidableEq α]
 variable {m n : Nat} [NeZero n]
 
-abbrev symbols (M : Fin m → Fin n → α) : Finset α := 
+abbrev symbols (M : Fin m → Fin n → α) : Finset α :=
   (Finset.image fun (x,y) ↦ M x y) Finset.univ
 
 abbrev exactly_n_symbols (M : Fin m → Fin n → α) :=
@@ -65,7 +65,7 @@ abbrev distinct_col_entries (M : Fin m → Fin n → α) : Prop :=
 abbrev distinct_row_entries (M : Fin m → Fin n → α) : Prop :=
   ∀ x : Fin m, ∀ y₁ y₂ : Fin n, y₁ ≠ y₂ → M x y₁ ≠ M x y₂
 
-/-- For m ≤ n, an m × n Latin rectangle is a partial n × n Latin Square where 
+/-- For m ≤ n, an m × n Latin rectangle is a partial n × n Latin Square where
     the first m entries are filled. -/
 class LatinRectangle (m n : Nat) (α : Type u) [DecidableEq α] where
   /-- An m × n array of symbols. -/
@@ -82,7 +82,7 @@ class LatinRectangle (m n : Nat) (α : Type u) [DecidableEq α] where
 instance {m n : Nat} {α : Type u} [DecidableEq α] [ToString α] :
   Repr (LatinRectangle m n α) where
     reprPrec L _ :=
-      let row (i : Fin m) := 
+      let row (i : Fin m) :=
         String.intercalate " " (List.ofFn (fun j => (toString (L.M i j))));
       String.intercalate "\n" (List.ofFn row)
 
@@ -95,7 +95,7 @@ lemma latin_square_row_implies_latin_rectangle_row
   (h₁ : exactly_n_symbols M)
   (h₂ : once_per_row M) :
   (∀ (x : Fin n), ∀ (y₁ y₂ : Fin n), y₁ ≠ y₂ → ((M x y₁) ≠ (M x y₂))) := by sorry
-  
+
 omit [NeZero n]
 lemma latin_square_col_implies_latin_rectangle_col
   (M : Fin n → Fin n → α)
@@ -103,13 +103,13 @@ lemma latin_square_col_implies_latin_rectangle_col
   (h₂ : once_per_column M) :
   (∀ (y : Fin n), ∀ (x₁ x₂ : Fin n), x₁ ≠ x₂ → ((M x₁ y) ≠ (M x₂ y))) := by sorry
 
-/-- A LatinSquare is an n × n array containing exactly n symbols, 
+/-- A LatinSquare is an n × n array containing exactly n symbols,
     each occurring exactly once in each row and exactly once in each column. -/
 class LatinSquare (n : Nat) (α : Type u) [DecidableEq α] extends LatinRectangle n n α where
   /-- Each column contains each symbol exactly once. -/
-  once_per_column : once_per_column M 
+  once_per_column : once_per_column M
   /-- If each column contains each symbol exactly once, then there are no repeats across columns. -/
-  distinct_col_entries := latin_square_col_implies_latin_rectangle_col 
+  distinct_col_entries := latin_square_col_implies_latin_rectangle_col
     M exactly_n_symbols once_per_column
   m_le_n := by rfl
 
@@ -125,14 +125,14 @@ def group_to_cayley_table {G : Type*} [DecidableEq G] [Group G] [Fintype G]
   (h : n = Fintype.card G := by simp) :
   LatinSquare n G := {
     M := fun i j ↦ (ordering i) * (ordering j),
-    exactly_n_symbols := by 
+    exactly_n_symbols := by
       simp [exactly_n_symbols,symbols]
       conv =>
         rhs
         rw [h]
       congr
       ext a
-      constructor 
+      constructor
       · simp
       · intro h'
         rw [Finset.mem_image]
@@ -140,28 +140,28 @@ def group_to_cayley_table {G : Type*} [DecidableEq G] [Group G] [Fintype G]
         set j' := ordering.symm 1
         use (i',j')
         simp [i', j']
-    once_per_row := by 
+    once_per_row := by
       simp [once_per_row]
       intro i g x y z
       set g' := ordering i
       set j := ordering.symm (g'⁻¹*g)
       use j
       simp [g',j]
-      intro k h' 
+      intro k h'
       have hia : (ordering i)⁻¹ * ((ordering i) * (ordering k)) = (ordering i)⁻¹ * g := by
        rw [mul_right_inj (ordering i)⁻¹ (b := (ordering i)*(ordering k)) (c := g)]
        exact h'
       simp at hia
       rw [<- hia]
       simp
-    once_per_column := by 
+    once_per_column := by
       simp [once_per_column]
       intro i g x y z
       set g' := ordering i
       set j := ordering.symm (g*g'⁻¹)
       use j
       simp [g',j]
-      intro k h' 
+      intro k h'
       have hia : (ordering k) * (ordering i) * (ordering i)⁻¹ = g * (ordering i)⁻¹  := by
        rw [mul_left_inj (ordering i)⁻¹ (b := (ordering k)*(ordering i)) (c := g)]
        exact h'
@@ -202,15 +202,15 @@ def reflLatinSquareIsotopy {n : Nat} {α : Type u} [DecidableEq α] [Nonempty α
 
 end Isotopy
 
-section Completion 
+section Completion
 
 def is_subrect {m n m' n' : Nat}
   (A : LatinRectangle m n α)
   (B : LatinRectangle m' n' α)
   (h₁ : m ≤ m' := by omega)
-  (h₂ : n ≤ n' := by omega) := 
-  ∀ (i : Fin m), ∀ (j : Fin n), A.M i j = B.M ⟨i, by omega⟩ ⟨j, by omega⟩ 
- 
+  (h₂ : n ≤ n' := by omega) :=
+  ∀ (i : Fin m), ∀ (j : Fin n), A.M i j = B.M ⟨i, by omega⟩ ⟨j, by omega⟩
+
 def symbols_not_in
 {k n : Nat} [NeZero k] [NeZero n]
  (A : LatinRectangle k n α) (j : Fin n) :=
@@ -221,14 +221,43 @@ theorem latin_rectangle_extends
   {k n : Nat} [NeZero k] [NeZero n]
     (A : LatinRectangle k n α)
     (h : k < n := by omega) :
-    ∃ (A' : LatinRectangle (k + 1) n α), is_subrect A A' := by 
+    ∃ (A' : LatinRectangle (k + 1) n α), is_subrect A A' := by
   let B := symbols_not_in A
-  have h : ∀ (s : Finset (Fin n)), (Finset.card s) ≤ (Finset.card (s.biUnion B)) := sorry
+  have ls_excl (i : Fin k) (j : Fin n) : A.M i j ∉ B j := by sorry
+  have Bj_size (j : Fin n) : Finset.card (B j) = n-k := by sorry
+  have exact_i : ∀ x ∈ symbols A.M, ∀ (t : Finset (Fin n)), 
+    (Finset.card {j | j ∈ t ∧ x ∈ B j}) ≤ n-k := by 
+    intro x hx t
+    simp [B, symbols_not_in]
+    sorry
+  have h : ∀ (s : Finset (Fin n)), (Finset.card s) ≤ (Finset.card (s.biUnion B)) := by
+    intro s
+    set l := s.card with hl
+    have h1 : ∑ j ∈ s, (Finset.card (B j)) = l*(n-k) := by 
+      conv =>
+        congr
+        arg 2
+        ext j 
+        rw [Bj_size]
+      simp [hl]
+    by_contra hc
+    simp at hc
+    have hcount : (s.biUnion B).card < l → 
+      ∃ (x : α), 
+      ∃ (t : Finset (Fin n)), 
+      n-k < (Finset.card {j | j ∈ t ∧ x ∈ B j}) := by sorry -- some sum nonsense here
+    apply hcount at hc
+    obtain ⟨x, t, hxt⟩ := hc
+    have hxsym : x ∈ symbols A.M := by sorry
+    specialize exact_i x
+    apply exact_i at hxsym
+    specialize hxsym t
+    omega
   let halls := hallMatchingsOn.nonempty (B) h (Finset.univ)
   set f := Classical.choice halls with hx
   simp [hallMatchingsOn] at f
   obtain ⟨ f', hf⟩ := f
-  let M' : Fin (k+1) → (Fin n) → α := fun i j => 
+  let M' : Fin (k+1) → (Fin n) → α := fun i j =>
     if hif : i < k then A.M ⟨i, hif⟩ j else (f' ⟨j, by simp⟩ )
   let A' : LatinRectangle (k+1) n α := {
     M := M'
@@ -238,8 +267,11 @@ theorem latin_rectangle_extends
     m_le_n := by omega
   }
   use A'
-  -- TODO prove subrect
-  sorry
+  unfold is_subrect
+  unfold LatinRectangle.M
+  simp[A', M'] 
+  intro i j
+  rfl
 
 end Completion
 
