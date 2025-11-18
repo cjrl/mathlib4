@@ -116,8 +116,8 @@ class LatinSquare (n : Nat) (α : Type u) [DecidableEq α] extends LatinRectangl
 instance {n : Nat} {α : Type*} [DecidableEq α] [ToString α] :
   Repr (LatinSquare n α) where
     reprPrec L prec := Repr.reprPrec L.toLatinRectangle prec
-/-- Every Finite Group's Cayley table is an example of a Latin Square. -/
 
+/-- Every Finite Group's Cayley table is an example of a Latin Square. -/
 @[to_additive]
 def group_to_cayley_table {G : Type*} [DecidableEq G] [Group G] [Fintype G]
   {n : Nat} [NeZero n]
@@ -229,6 +229,7 @@ theorem latin_rectangle_extends
     (Finset.card {j | j ∈ t ∧ x ∈ B j}) ≤ n-k := by 
     intro x hx t
     simp [B, symbols_not_in]
+    -- Properties of latin rectangle
     sorry
   have h : ∀ (s : Finset (Fin n)), (Finset.card s) ≤ (Finset.card (s.biUnion B)) := by
     intro s
@@ -245,7 +246,18 @@ theorem latin_rectangle_extends
     have hcount : (s.biUnion B).card < l → 
       ∃ (x : α), 
       ∃ (t : Finset (Fin n)), 
-      n-k < (Finset.card {j | j ∈ t ∧ x ∈ B j}) := by sorry -- some sum nonsense here
+      n-k < (Finset.card {j | j ∈ t ∧ x ∈ B j}) := by 
+        set B' : Finset (Fin n) → α → Finset (Fin n) := 
+          fun t x => {j | j ∈ t ∧ x ∈ B j} with hb'
+        intro h2
+        by_contra hc
+        simp at hc
+        have h3 : ∑ j ∈ s, (Finset.card (B j)) = ∑ x ∈ (s.biUnion B), 
+          Finset.card (B' s x) := by sorry
+        simp[h1] at h3 
+        unfold B' at h3
+        --apply Finset.sum_le_sum at hc
+        sorry 
     apply hcount at hc
     obtain ⟨x, t, hxt⟩ := hc
     have hxsym : x ∈ symbols A.M := by sorry
@@ -274,5 +286,7 @@ theorem latin_rectangle_extends
   rfl
 
 end Completion
+
+#check Finset.sum_le_sum
 
 end LatinSquare
