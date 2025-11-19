@@ -245,25 +245,41 @@ theorem latin_rectangle_extends
     simp at hc
     have hcount : (s.biUnion B).card < l → 
       ∃ (x : α), 
-      ∃ (t : Finset (Fin n)), 
-      n-k < (Finset.card {j | j ∈ t ∧ x ∈ B j}) := by 
+      n-k < (Finset.card {j | j ∈ s ∧ x ∈ B j}) := by 
         set B' : Finset (Fin n) → α → Finset (Fin n) := 
           fun t x => {j | j ∈ t ∧ x ∈ B j} with hb'
         intro h2
         by_contra hc
-        simp at hc
+        simp  at hc
         have h3 : ∑ j ∈ s, (Finset.card (B j)) = ∑ x ∈ (s.biUnion B), 
           Finset.card (B' s x) := by sorry
         simp[h1] at h3 
         unfold B' at h3
-        --apply Finset.sum_le_sum at hc
-        sorry 
+        -- set bu := (s.biUnion B) with hbu
+        have hc' : (∀ i ∈ s.biUnion B, Finset.card {j | j ∈ s ∧ i ∈ B j} ≤ n - k) := by sorry
+        have g := Finset.sum_le_sum  (s := s.biUnion B) (ι := α)
+          (f := fun x => Finset.card {j | j ∈ s ∧ x ∈ B j})
+          (g := fun _ => n-k)
+        apply g at hc'
+        simp at hc'
+        -- have _ : 0 < (s.biUnion B).card := by sorry
+        -- have _ : 0 < s.card := by sorry
+        have _ : 0 < (n-k) := by sorry
+        have _ : (Finset.card (s.biUnion B))*(n-k) < l*(n-k) := by 
+          rw [Nat.mul_lt_mul_right]
+          omega
+          assumption
+        have hc'' : ∑ i ∈ s.biUnion B, Finset.card {j | j ∈ s ∧ i ∈ B j} < l* (n - k) := by omega
+        -- have final_c := And.intro h3.symm hc''
+        -- simp at final_c
+        rw [<-h3] at hc''
+        simp at hc''
     apply hcount at hc
-    obtain ⟨x, t, hxt⟩ := hc
-    have hxsym : x ∈ symbols A.M := by sorry
+    obtain ⟨ x, hx ⟩ := hc
     specialize exact_i x
+    have hxsym : x ∈ symbols A.M := by sorry
     apply exact_i at hxsym
-    specialize hxsym t
+    specialize hxsym s
     omega
   let halls := hallMatchingsOn.nonempty (B) h (Finset.univ)
   set f := Classical.choice halls with hx
