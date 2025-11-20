@@ -217,6 +217,19 @@ def symbols_not_in
   let D := Finset.image (fun i => A.M i j) Finset.univ
   (symbols A.M) \ D
 
+lemma exists_larger_subset
+  {B : Fin n → Finset α}
+  {s : Finset (Fin n)}
+  {k : Nat} [NeZero k]
+  {h : ∀ j, Finset.card (B j) = k} :
+     (s.biUnion B).card < (s.card) → 
+      ∃ (x : α), k < (Finset.card {j | j ∈ s ∧ x ∈ B j}) := by sorry
+
+lemma hall_property
+  {B : Fin n → Finset α}
+  {h : ∃ k, ∀ j, Finset.card (B j) = k} :
+  ∀ (s : Finset (Fin n)), (Finset.card s) ≤ (Finset.card (s.biUnion B)) := by sorry
+
 theorem latin_rectangle_extends
   {k n : Nat} [NeZero k] [NeZero n]
     (A : LatinRectangle k n α)
