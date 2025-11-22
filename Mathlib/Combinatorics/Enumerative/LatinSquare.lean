@@ -221,9 +221,34 @@ lemma exists_larger_subset
   {B : Fin n → Finset α}
   {s : Finset (Fin n)}
   {k : Nat} [NeZero k]
-  {h : ∀ j, Finset.card (B j) = k} :
-     (s.biUnion B).card < (s.card) → 
-      ∃ (x : α), k < (Finset.card {j | j ∈ s ∧ x ∈ B j}) := by sorry
+  (h₁ : ∀ j, Finset.card (B j) = k)
+  (h₂ : (s.biUnion B).card < (s.card)) :
+      ∃ (x : α), k < (Finset.card {j | j ∈ s ∧ x ∈ B j}) := by
+      by_contra hc
+      simp at hc
+      have pullback : ∀ i ∈ (s.biUnion B), 
+        ∃ x, {j | j ∈ s ∧ i ∈ B j} = {j | j ∈ s ∧ x ∈ B j} := by sorry
+      have hc' : (∀ i ∈ s.biUnion B, Finset.card {j | j ∈ s ∧ i ∈ B j} ≤ k) := by 
+        intro i
+        intro h
+        specialize pullback i
+        apply pullback at h        
+        obtain ⟨ x , hx ⟩ := h
+        specialize hc x
+        -- change Finset.card ({j | j ∈ s ∧ i ∈ B j}) ≤ k
+        -- conv =>
+        --   lhs
+        --   congr 
+        --   rw [hx]
+        sorry
+      
+
+      -- have pullback :  ∀ (x : α), ∃ i, Finset.card {j | j ∈ s ∧ x ∈ B j} 
+      --      = Finset.card {j | j ∈ s ∧ i ∈ B j} := by sorry
+      have g := Finset.sum_le_sum  (s := s.biUnion B) (ι := α)
+        (f := fun x => Finset.card {j | j ∈ s ∧ x ∈ B j})
+        (g := fun _ => k)
+      sorry
 
 lemma hall_property
   {B : Fin n → Finset α}
