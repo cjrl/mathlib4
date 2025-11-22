@@ -220,14 +220,17 @@ def symbols_not_in
 lemma exists_larger_subset
   {B : Fin n → Finset α}
   {s : Finset (Fin n)}
-  {k : Nat} [NeZero k]
+  {k : Nat} [nek : NeZero k]
   (h₁ : ∀ j, Finset.card (B j) = k)
   (h₂ : (s.biUnion B).card < (s.card)) :
       ∃ (x : α), k < (Finset.card {j | j ∈ s ∧ x ∈ B j}) := by
       by_contra hc
       simp at hc
       have pullback : ∀ i ∈ (s.biUnion B), 
-        ∃ x, {j | j ∈ s ∧ i ∈ B j} = {j | j ∈ s ∧ x ∈ B j} := by sorry
+        ∃ x, ∀ j, (j ∈ s ∧ i ∈ B j) ↔ (j ∈ s ∧ x ∈ B j) := by
+          intro i hi
+          use i
+          simp
       have hc' : (∀ i ∈ s.biUnion B, Finset.card {j | j ∈ s ∧ i ∈ B j} ≤ k) := by 
         intro i
         intro h
@@ -235,20 +238,31 @@ lemma exists_larger_subset
         apply pullback at h        
         obtain ⟨ x , hx ⟩ := h
         specialize hc x
-        -- change Finset.card ({j | j ∈ s ∧ i ∈ B j}) ≤ k
-        -- conv =>
-        --   lhs
-        --   congr 
-        --   rw [hx]
-        sorry
-      
-
-      -- have pullback :  ∀ (x : α), ∃ i, Finset.card {j | j ∈ s ∧ x ∈ B j} 
-      --      = Finset.card {j | j ∈ s ∧ i ∈ B j} := by sorry
+        conv =>
+          lhs
+          congr 
+          congr
+          ext
+          rw[hx]
+        exact hc
       have g := Finset.sum_le_sum  (s := s.biUnion B) (ι := α)
         (f := fun x => Finset.card {j | j ∈ s ∧ x ∈ B j})
         (g := fun _ => k)
-      sorry
+      apply g at hc'
+      simp at hc'
+      have _ : 0 < k := by
+        have _ := nek.out
+        omega
+      have _ : (Finset.card (s.biUnion B))*k < s.card*k := by
+        rw [Nat.mul_lt_mul_right]
+        omega
+        assumption
+      replace hc' : ∑ i ∈ s.biUnion B, Finset.card {j | j ∈ s ∧ i ∈ B j} < (s.card) * k := by omega
+      have h' : ∑ j ∈ s, (Finset.card (B j)) = ∑ x ∈ (s.biUnion B), 
+        Finset.card {j | j ∈ s ∧ x ∈ B j} := by sorry
+      rw[←h'] at hc'
+      simp[h₁] at hc'
+      
 
 lemma hall_property
   {B : Fin n → Finset α}
@@ -281,39 +295,11 @@ theorem latin_rectangle_extends
       simp [hl]
     by_contra hc
     simp at hc
-    have hcount : (s.biUnion B).card < l → 
-      ∃ (x : α), 
-      n-k < (Finset.card {j | j ∈ s ∧ x ∈ B j}) := by 
-        set B' : Finset (Fin n) → α → Finset (Fin n) := 
-          fun t x => {j | j ∈ t ∧ x ∈ B j} with hb'
-        intro h2
-        by_contra hc
-        simp  at hc
-        have h3 : ∑ j ∈ s, (Finset.card (B j)) = ∑ x ∈ (s.biUnion B), 
-          Finset.card (B' s x) := by sorry
-        simp[h1] at h3 
-        unfold B' at h3
-        -- set bu := (s.biUnion B) with hbu
-        have hc' : (∀ i ∈ s.biUnion B, Finset.card {j | j ∈ s ∧ i ∈ B j} ≤ n - k) := by sorry
-        have g := Finset.sum_le_sum  (s := s.biUnion B) (ι := α)
-          (f := fun x => Finset.card {j | j ∈ s ∧ x ∈ B j})
-          (g := fun _ => n-k)
-        apply g at hc'
-        simp at hc'
-        -- have _ : 0 < (s.biUnion B).card := by sorry
-        -- have _ : 0 < s.card := by sorry
-        have _ : 0 < (n-k) := by sorry
-        have _ : (Finset.card (s.biUnion B))*(n-k) < l*(n-k) := by 
-          rw [Nat.mul_lt_mul_right]
-          omega
-          assumption
-        have hc'' : ∑ i ∈ s.biUnion B, Finset.card {j | j ∈ s ∧ i ∈ B j} < l* (n - k) := by omega
-        -- have final_c := And.intro h3.symm hc''
-        -- simp at final_c
-        rw [<-h3] at hc''
-        simp at hc''
-    apply hcount at hc
-    obtain ⟨ x, hx ⟩ := hc
+    have _ : NeZero (n-k) := {
+      out := by omega
+    }
+    have hcount := exists_larger_subset Bj_size hc
+    obtain ⟨ x, hx ⟩ := hcount
     specialize exact_i x
     have hxsym : x ∈ symbols A.M := by sorry
     apply exact_i at hxsym
