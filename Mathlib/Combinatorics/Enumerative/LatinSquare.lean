@@ -217,6 +217,23 @@ def symbols_not_in
   let D := Finset.image (fun i => A.M i j) Finset.univ
   (symbols A.M) \ D
 
+lemma count_by_group_or_element_indicator_
+  {ι : Type*} [Fintype ι] [DecidableEq ι]
+  (B : ι → Finset α)
+  (s : Finset ι)
+  : ∑ j ∈ s, (Finset.card (B j)) = 
+  ∑ x ∈ (s.biUnion B), Finset.card {j | j ∈ s ∧ x ∈ B j} := by 
+    let E : Finset (ι × (s.biUnion B)) := {b | b.1 ∈ s ∧ ↑(b.2) ∈ (B b.1)}
+    let amb : E → ι × (s.biUnion B) := fun b => (b : ι × (s.biUnion B))
+    let p1 : E → ι := Prod.fst ∘ amb
+    let p2 : E → s.biUnion B := Prod.snd ∘ amb
+    have hp1 : Set.MapsTo p1 (Finset.univ : Finset E) (Finset.univ : Finset ι) := by sorry
+    have h1 := Finset.card_eq_sum_card_fiberwise hp1 
+    have p1_im : ∀ j, {a | p1 a = j} ≃ B j := by sorry
+    have hp2 : Set.MapsTo p2 (Finset.univ : Finset E) (Finset.univ : Finset (s.biUnion B)) := by sorry
+    have h2 := Finset.card_eq_sum_card_fiberwise hp2 
+    sorry
+
 lemma exists_larger_subset
   {B : Fin n → Finset α}
   {s : Finset (Fin n)}
