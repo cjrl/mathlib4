@@ -258,8 +258,21 @@ lemma exists_larger_subset
         omega
         assumption
       replace hc' : ∑ i ∈ s.biUnion B, Finset.card {j | j ∈ s ∧ i ∈ B j} < (s.card) * k := by omega
-      have h' : ∑ j ∈ s, (Finset.card (B j)) = ∑ x ∈ (s.biUnion B), 
-        Finset.card {j | j ∈ s ∧ x ∈ B j} := by sorry
+
+      have h' : ∑ j ∈ s, (Finset.card (B j)) = 
+        ∑ x ∈ (s.biUnion B), Finset.card {j | j ∈ s ∧ x ∈ B j} := by
+          set E : Set (Fin n × α) := {b | b.1 ∈ s ∧ b.2 ∈ (B b.1)} with hE
+          have hp1 : Set.MapsTo Prod.fst (E) (Set.univ) := by sorry
+          have hp2 : Set.MapsTo Prod.snd (E) (Set.univ : Set α) := by sorry
+          let p1 : E → Set.univ := Set.MapsTo.restrict Prod.fst E (Set.univ) hp1
+          let p2 : E → (Set.univ : Set α) := Set.MapsTo.restrict Prod.snd E (Set.univ) hp2
+          let inv_p1 : ∀ j, Set.preimage p1 ({j}) ≃ B j
+          -- let inv_p2 : ∀ (x : α), Set.preimage p2 ({x}) ≃ {j | j ∈ s ∧ x ∈ B j}
+
+          -- apply Finset.card_eq_sum_card_fiberwise
+          -- rw [Finset.sum_card_fiberwise_eq_card_filter]
+          sorry
+          -- {(j ∈ s, x ∈ biUnion, is x ∈ B j)}
       rw[←h'] at hc'
       simp[h₁] at hc'
       
