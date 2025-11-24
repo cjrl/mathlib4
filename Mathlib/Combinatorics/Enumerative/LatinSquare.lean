@@ -227,10 +227,11 @@ lemma count_by_group_or_element_indicator_
     let amb : E → ι × (s.biUnion B) := fun b => (b : ι × (s.biUnion B))
     let p1 : E → ι := Prod.fst ∘ amb
     let p2 : E → s.biUnion B := Prod.snd ∘ amb
-    have hp1 : Set.MapsTo p1 (Finset.univ : Finset E) (Finset.univ : Finset ι) := by sorry
+    have hp1 : Set.MapsTo p1 (Finset.univ : Finset E) (Finset.univ : Finset ι) := by simp 
     have h1 := Finset.card_eq_sum_card_fiberwise hp1 
     have p1_im : ∀ j, {a | p1 a = j} ≃ B j := by sorry
-    have hp2 : Set.MapsTo p2 (Finset.univ : Finset E) (Finset.univ : Finset (s.biUnion B)) := by sorry
+    have hp2 : Set.MapsTo p2 (Finset.univ : Finset E) 
+      (Finset.univ : Finset (s.biUnion B)) := by simp
     have h2 := Finset.card_eq_sum_card_fiberwise hp2 
     sorry
 
