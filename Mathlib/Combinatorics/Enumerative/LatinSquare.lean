@@ -221,19 +221,61 @@ lemma count_by_group_or_element_indicator_
   {ι : Type*} [Fintype ι] [DecidableEq ι]
   (B : ι → Finset α)
   (s : Finset ι)
-  : ∑ j ∈ s, (Finset.card (B j)) = 
-  ∑ x ∈ (s.biUnion B), Finset.card {j | j ∈ s ∧ x ∈ B j} := by 
+  : ∑ j ∈ s, (Finset.card (B j)) =
+  ∑ x ∈ (s.biUnion B), Finset.card {j | j ∈ s ∧ x ∈ B j} := by
     let E : Finset (ι × (s.biUnion B)) := {b | b.1 ∈ s ∧ ↑(b.2) ∈ (B b.1)}
     let amb : E → ι × (s.biUnion B) := fun b => (b : ι × (s.biUnion B))
     let p1 : E → ι := Prod.fst ∘ amb
-    let p2 : E → s.biUnion B := Prod.snd ∘ amb
-    have hp1 : Set.MapsTo p1 (Finset.univ : Finset E) (Finset.univ : Finset ι) := by simp 
-    have h1 := Finset.card_eq_sum_card_fiberwise hp1 
+    have hp1 : Set.MapsTo p1 (Finset.univ : Finset E) (Finset.univ : Finset ι) := by simp
+    have h1 := Finset.card_eq_sum_card_fiberwise hp1
+    have j_not_in_s_zero_summand : ∀ j ∈ sᶜ, Finset.card {a | p1 a = j} = 0 := by sorry
+    have s_s_complement_disj : Disjoint s (sᶜ) := by sorry
+    have h1_split := Finset.sum_union s_s_complement_disj (f := fun j => Finset.card {a | p1 a = j})
+    replace j_not_in_s_zero_summand := Finset.sum_congr (by rfl) j_not_in_s_zero_summand
+    conv at j_not_in_s_zero_summand =>
+      rhs
+      simp
+    rw [j_not_in_s_zero_summand] at h1_split
+    simp at h1_split
+    simp at h1
+    rw [h1_split] at h1
     have p1_im : ∀ j, {a | p1 a = j} ≃ B j := by sorry
-    have hp2 : Set.MapsTo p2 (Finset.univ : Finset E) 
+    have h1' : ∀ j, Finset.card {a | p1 a = j} = (B j).card := by
+      intro j
+      specialize p1_im j
+      simp at p1_im
+      apply Finset.card_eq_of_equiv
+      simp
+      exact p1_im
+    have h1'set : ∀ j ∈ s, Finset.card {a | p1 a = j} = (B j).card := by
+      intro j hj
+      specialize h1' j
+      exact h1'
+    have h1'' := Finset.sum_congr (by rfl) h1'set
+      (f := fun j => Finset.card {a | p1 a = j}) (g := fun j => Finset.card (B j))
+    rw [←h1'']
+    simp
+    rw [←h1]
+    -- Second half is E.card
+    clear h1 h1' h1'' hp1 h1_split p1_im h1'set s_s_complement_disj j_not_in_s_zero_summand
+    let p2 : E → s.biUnion B := Prod.snd ∘ amb
+    have hp2 : Set.MapsTo p2 (Finset.univ : Finset E)
       (Finset.univ : Finset (s.biUnion B)) := by simp
-    have h2 := Finset.card_eq_sum_card_fiberwise hp2 
-    sorry
+    have h2 := Finset.card_eq_sum_card_fiberwise hp2
+    have h2' : ∀ x, {a | p2 a = x} ≃ {j | j ∈ s ∧ ↑x ∈ B j} := by sorry
+    have h2'set : ∀ x ∈ (s.biUnion B),
+      Finset.card {a | p2 a = x} = Finset.card {j | j ∈ s ∧ ↑x ∈ B j} := by sorry
+    have h2'' := Finset.sum_congr
+      (s₁ := s.biUnion B) (s₂ := s.biUnion B) (by rfl) h2'set
+      (f := fun x => Finset.card  {a | p2 a = x})
+      (g := fun x => Finset.card  {j | j ∈ s ∧ ↑x ∈ B j})
+    rw [←h2'']
+    simp
+    simp at h2
+    have hfin : ∑ x ∈ (s.biUnion B).attach, {a ∈ E.attach | p2 a = x}.card =
+    ∑ x ∈ s.biUnion B, {a ∈ E.attach | ↑(p2 a) = x}.card := by sorry
+    rw[← hfin ]
+    exact h2
 
 lemma exists_larger_subset
   {B : Fin n → Finset α}
@@ -244,21 +286,21 @@ lemma exists_larger_subset
       ∃ (x : α), k < (Finset.card {j | j ∈ s ∧ x ∈ B j}) := by
       by_contra hc
       simp at hc
-      have pullback : ∀ i ∈ (s.biUnion B), 
+      have pullback : ∀ i ∈ (s.biUnion B),
         ∃ x, ∀ j, (j ∈ s ∧ i ∈ B j) ↔ (j ∈ s ∧ x ∈ B j) := by
           intro i hi
           use i
           simp
-      have hc' : (∀ i ∈ s.biUnion B, Finset.card {j | j ∈ s ∧ i ∈ B j} ≤ k) := by 
+      have hc' : (∀ i ∈ s.biUnion B, Finset.card {j | j ∈ s ∧ i ∈ B j} ≤ k) := by
         intro i
         intro h
         specialize pullback i
-        apply pullback at h        
+        apply pullback at h
         obtain ⟨ x , hx ⟩ := h
         specialize hc x
         conv =>
           lhs
-          congr 
+          congr
           congr
           ext
           rw[hx]
@@ -277,7 +319,7 @@ lemma exists_larger_subset
         assumption
       replace hc' : ∑ i ∈ s.biUnion B, Finset.card {j | j ∈ s ∧ i ∈ B j} < (s.card) * k := by omega
 
-      have h' : ∑ j ∈ s, (Finset.card (B j)) = 
+      have h' : ∑ j ∈ s, (Finset.card (B j)) =
         ∑ x ∈ (s.biUnion B), Finset.card {j | j ∈ s ∧ x ∈ B j} := by
           set E : Set (Fin n × α) := {b | b.1 ∈ s ∧ b.2 ∈ (B b.1)} with hE
           have hp1 : Set.MapsTo Prod.fst (E) (Set.univ) := by sorry
@@ -293,7 +335,7 @@ lemma exists_larger_subset
           -- {(j ∈ s, x ∈ biUnion, is x ∈ B j)}
       rw[←h'] at hc'
       simp[h₁] at hc'
-      
+
 
 lemma hall_property
   {B : Fin n → Finset α}
@@ -308,8 +350,8 @@ theorem latin_rectangle_extends
   let B := symbols_not_in A
   have ls_excl (i : Fin k) (j : Fin n) : A.M i j ∉ B j := by sorry
   have Bj_size (j : Fin n) : Finset.card (B j) = n-k := by sorry
-  have exact_i : ∀ x ∈ symbols A.M, ∀ (t : Finset (Fin n)), 
-    (Finset.card {j | j ∈ t ∧ x ∈ B j}) ≤ n-k := by 
+  have exact_i : ∀ x ∈ symbols A.M, ∀ (t : Finset (Fin n)),
+    (Finset.card {j | j ∈ t ∧ x ∈ B j}) ≤ n-k := by
     intro x hx t
     simp [B, symbols_not_in]
     -- Properties of latin rectangle
@@ -317,11 +359,11 @@ theorem latin_rectangle_extends
   have h : ∀ (s : Finset (Fin n)), (Finset.card s) ≤ (Finset.card (s.biUnion B)) := by
     intro s
     set l := s.card with hl
-    have h1 : ∑ j ∈ s, (Finset.card (B j)) = l*(n-k) := by 
+    have h1 : ∑ j ∈ s, (Finset.card (B j)) = l*(n-k) := by
       conv =>
         congr
         arg 2
-        ext j 
+        ext j
         rw [Bj_size]
       simp [hl]
     by_contra hc
@@ -352,7 +394,7 @@ theorem latin_rectangle_extends
   use A'
   unfold is_subrect
   unfold LatinRectangle.M
-  simp[A', M'] 
+  simp[A', M']
   intro i j
   rfl
 
