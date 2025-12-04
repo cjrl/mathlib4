@@ -263,8 +263,30 @@ lemma count_by_group_or_element_indicator
       (Finset.univ : Finset (s.biUnion B)) := by simp
     have h2 := Finset.card_eq_sum_card_fiberwise hp2
     have h2' : ∀ x, {a | p2 a = x} ≃ {j | j ∈ s ∧ ↑x ∈ B j} := by sorry
+
     have h2'set : ∀ x ∈ (s.biUnion B),
-      Finset.card {a | p2 a = x} = Finset.card {j | j ∈ s ∧ ↑x ∈ B j} := by sorry
+      Finset.card {a | p2 a = x} = Finset.card {j | j ∈ s ∧ ↑x ∈ B j} := by 
+        intro x hx
+        apply Finset.card_eq_of_equiv
+        specialize h2' ⟨ x, hx ⟩ 
+        simp at h2'
+        simp
+        apply Equiv.trans (α := { a // ↑(p2 a) = x }) 
+          (γ := { j // j ∈ s ∧ x ∈ B j}) 
+          (β := { a // p2 a = ⟨x, hx⟩ })
+        have hl a: ↑(p2 a) = x ↔ p2 a = ⟨x, hx⟩ := by 
+          have h := Subtype.coe_eq_iff (a := p2 a) (b := x)
+          rw [h]
+          constructor 
+          · simp
+          · intro hp2a
+            use hx
+        conv =>
+          lhs 
+          congr
+          ext a
+          rw [hl a]
+        exact h2'
     have h2'' := Finset.sum_congr
       (s₁ := s.biUnion B) (s₂ := s.biUnion B) (by rfl) h2'set
       (f := fun x => Finset.card  {a | p2 a = x})
