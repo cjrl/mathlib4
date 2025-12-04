@@ -217,7 +217,7 @@ def symbols_not_in
   let D := Finset.image (fun i => A.M i j) Finset.univ
   (symbols A.M) \ D
 
-lemma count_by_group_or_element_indicator_
+lemma count_by_group_or_element_indicator
   {ι : Type*} [Fintype ι] [DecidableEq ι]
   (B : ι → Finset α)
   (s : Finset ι)
@@ -273,8 +273,15 @@ lemma count_by_group_or_element_indicator_
     simp
     simp at h2
     have hfin : ∑ x ∈ (s.biUnion B).attach, {a ∈ E.attach | p2 a = x}.card =
-    ∑ x ∈ s.biUnion B, {a ∈ E.attach | ↑(p2 a) = x}.card := by sorry
-    rw[← hfin ]
+                ∑ x ∈ s.biUnion B, {a ∈ E.attach | ↑(p2 a) = x}.card := by 
+         have h := Finset.sum_attach (s.biUnion B) (fun x => {a ∈ E.attach | p2 a = x}.card )
+         rw [<- h]
+         congr
+         ext x
+         congr
+         ext a
+         rw [SetCoe.ext_iff]
+    rw[← hfin]
     exact h2
 
 lemma exists_larger_subset
