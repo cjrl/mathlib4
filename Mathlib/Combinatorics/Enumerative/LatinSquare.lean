@@ -229,7 +229,12 @@ lemma count_by_group_or_element_indicator
     have hp1 : Set.MapsTo p1 (Finset.univ : Finset E) (Finset.univ : Finset ι) := by simp
     have h1 := Finset.card_eq_sum_card_fiberwise hp1
     have j_not_in_s_zero_summand : ∀ j ∈ sᶜ, Finset.card {a | p1 a = j} = 0 := by sorry
-    have s_s_complement_disj : Disjoint s (sᶜ) := by sorry
+    have s_s_complement_disj : Disjoint s (sᶜ) := by 
+      simp [Disjoint]
+      intro x hx hxc
+      have h := Finset.subset_inter hx hxc
+      simp at h
+      exact h
     have h1_split := Finset.sum_union s_s_complement_disj (f := fun j => Finset.card {a | p1 a = j})
     replace j_not_in_s_zero_summand := Finset.sum_congr (by rfl) j_not_in_s_zero_summand
     conv at j_not_in_s_zero_summand =>
@@ -262,7 +267,10 @@ lemma count_by_group_or_element_indicator
     have hp2 : Set.MapsTo p2 (Finset.univ : Finset E)
       (Finset.univ : Finset (s.biUnion B)) := by simp
     have h2 := Finset.card_eq_sum_card_fiberwise hp2
-    have h2' : ∀ x, {a | p2 a = x} ≃ {j | j ∈ s ∧ ↑x ∈ B j} := by sorry
+    have h2' : ∀ x, {a | p2 a = x} ≃ {j | j ∈ s ∧ ↑x ∈ B j} := by 
+      intro x
+      simp [p2,amb]
+      sorry
 
     have h2'set : ∀ x ∈ (s.biUnion B),
       Finset.card {a | p2 a = x} = Finset.card {j | j ∈ s ∧ ↑x ∈ B j} := by 
