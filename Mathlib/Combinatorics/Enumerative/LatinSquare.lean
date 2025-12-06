@@ -228,7 +228,25 @@ lemma count_by_group_or_element_indicator
     let p1 : E → ι := Prod.fst ∘ amb
     have hp1 : Set.MapsTo p1 (Finset.univ : Finset E) (Finset.univ : Finset ι) := by simp
     have h1 := Finset.card_eq_sum_card_fiberwise hp1
-    have j_not_in_s_zero_summand : ∀ j ∈ sᶜ, Finset.card {a | p1 a = j} = 0 := by sorry
+    have j_not_in_s_zero_summand : ∀ j ∈ sᶜ, Finset.card {a | p1 a = j} = 0 := by 
+      intro j hjc
+      congr
+      rw [Finset.card_eq_zero]
+      ext b
+      constructor 
+      · intro hm
+        simp at hm
+        simp [p1,amb] at hm
+        have hb := b.property 
+        simp only [E] at hb
+        rw [Finset.mem_def] at hb
+        dsimp at hb
+        simp at hb
+        have hj := hb.1
+        rw [hm] at hj
+        simp at hjc 
+        contradiction
+      · simp
     have s_s_complement_disj : Disjoint s (sᶜ) := by 
       simp [Disjoint]
       intro x hx hxc
