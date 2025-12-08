@@ -260,7 +260,12 @@ lemma count_by_group_or_element_indicator
     simp at h1_split
     simp at h1
     rw [h1_split] at h1
-    have p1_im : ∀ j, {a | p1 a = j} ≃ B j := by sorry
+    have p1_im : ∀ j, {a | p1 a = j} ≃ B j := by 
+      intro j
+      simp[p1, amb]
+      refine ⟨fun a => ⟨a.val.1.2.val, sorry⟩, fun x => ⟨⟨(j, ⟨x.val,sorry⟩),sorry⟩ , sorry ⟩, ?_, ?_⟩ 
+      · sorry
+      · sorry
     have h1' : ∀ j, Finset.card {a | p1 a = j} = (B j).card := by
       intro j
       specialize p1_im j
