@@ -262,10 +262,20 @@ lemma count_by_group_or_element_indicator
     rw [h1_split] at h1
     have p1_im : ∀ j, {a | p1 a = j} ≃ B j := by 
       intro j
-      simp[p1, amb]
-      refine ⟨fun a => ⟨a.val.1.2.val, sorry⟩, fun x => ⟨⟨(j, ⟨x.val,sorry⟩),sorry⟩ , sorry ⟩, ?_, ?_⟩ 
-      · sorry
-      · sorry
+      refine ⟨fun x => ⟨x.val.1.2.val, by 
+                have h := x.val.property
+                unfold E at h
+                rw [Finset.mem_def] at h
+                simp at h
+                replace h := h.right
+                have j' := x.property
+                dsimp [p1,amb] at j'
+                rw [j'] at h
+                exact h⟩,
+              fun x => sorry,
+              sorry,
+              sorry⟩ 
+             -- fun x => ⟨⟨(j, ⟨x.val,sorry⟩),sorry⟩ , sorry ⟩, ?_, ?_⟩ 
     have h1' : ∀ j, Finset.card {a | p1 a = j} = (B j).card := by
       intro j
       specialize p1_im j
