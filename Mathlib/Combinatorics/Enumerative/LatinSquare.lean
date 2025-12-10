@@ -260,8 +260,8 @@ lemma count_by_group_or_element_indicator
     simp at h1_split
     simp at h1
     rw [h1_split] at h1
-    have p1_im : ∀ j, {a | p1 a = j} ≃ B j := by 
-      intro j
+    have p1_im : ∀ j ∈ s, {a | p1 a = j} ≃ B j := by 
+      intro j hj
       refine ⟨fun x => ⟨x.val.1.2.val, by 
                 have h := x.val.property
                 unfold E at h
@@ -272,28 +272,32 @@ lemma count_by_group_or_element_indicator
                 dsimp [p1,amb] at j'
                 rw [j'] at h
                 exact h⟩,
-              fun x => sorry,
-              sorry,
-              sorry⟩ 
-             -- fun x => ⟨⟨(j, ⟨x.val,sorry⟩),sorry⟩ , sorry ⟩, ?_, ?_⟩ 
-    have h1' : ∀ j, Finset.card {a | p1 a = j} = (B j).card := by
-      intro j
-      specialize p1_im j
+              fun x => ⟨⟨(j, ⟨x.val, by 
+                have h := x.property
+                rw [Finset.mem_biUnion]
+                use j ⟩), by simp [E]; exact hj ⟩, 
+              by simp [p1,amb]⟩,
+              ?left_inv,
+              ?right_inv⟩ 
+      · simp [Function.LeftInverse]
+        intros _ _ _ _ _ _ hp1
+        simp [p1,amb] at hp1
+        exact hp1.symm
+      · simp [Function.RightInverse, Function.LeftInverse]
+    have h1'set : ∀ j ∈ s, Finset.card {a | p1 a = j} = (B j).card := by
+      intro j hj
+      specialize p1_im j hj
       simp at p1_im
       apply Finset.card_eq_of_equiv
       simp
       exact p1_im
-    have h1'set : ∀ j ∈ s, Finset.card {a | p1 a = j} = (B j).card := by
-      intro j hj
-      specialize h1' j
-      exact h1'
     have h1'' := Finset.sum_congr (by rfl) h1'set
       (f := fun j => Finset.card {a | p1 a = j}) (g := fun j => Finset.card (B j))
     rw [←h1'']
     simp
     rw [←h1]
     -- Second half is E.card
-    clear h1 h1' h1'' hp1 h1_split p1_im h1'set s_s_complement_disj j_not_in_s_zero_summand
+    clear h1 h1'' hp1 h1_split p1_im h1'set s_s_complement_disj j_not_in_s_zero_summand
     let p2 : E → s.biUnion B := Prod.snd ∘ amb
     have hp2 : Set.MapsTo p2 (Finset.univ : Finset E)
       (Finset.univ : Finset (s.biUnion B)) := by simp
@@ -386,21 +390,9 @@ lemma exists_larger_subset
         omega
         assumption
       replace hc' : ∑ i ∈ s.biUnion B, Finset.card {j | j ∈ s ∧ i ∈ B j} < (s.card) * k := by omega
-
       have h' : ∑ j ∈ s, (Finset.card (B j)) =
-        ∑ x ∈ (s.biUnion B), Finset.card {j | j ∈ s ∧ x ∈ B j} := by
-          set E : Set (Fin n × α) := {b | b.1 ∈ s ∧ b.2 ∈ (B b.1)} with hE
-          have hp1 : Set.MapsTo Prod.fst (E) (Set.univ) := by sorry
-          have hp2 : Set.MapsTo Prod.snd (E) (Set.univ : Set α) := by sorry
-          let p1 : E → Set.univ := Set.MapsTo.restrict Prod.fst E (Set.univ) hp1
-          let p2 : E → (Set.univ : Set α) := Set.MapsTo.restrict Prod.snd E (Set.univ) hp2
-          let inv_p1 : ∀ j, Set.preimage p1 ({j}) ≃ B j
-          -- let inv_p2 : ∀ (x : α), Set.preimage p2 ({x}) ≃ {j | j ∈ s ∧ x ∈ B j}
-
-          -- apply Finset.card_eq_sum_card_fiberwise
-          -- rw [Finset.sum_card_fiberwise_eq_card_filter]
-          sorry
-          -- {(j ∈ s, x ∈ biUnion, is x ∈ B j)}
+        ∑ x ∈ (s.biUnion B), Finset.card {j | j ∈ s ∧ x ∈ B j} := 
+        count_by_group_or_element_indicator B s 
       rw[←h'] at hc'
       simp[h₁] at hc'
 
