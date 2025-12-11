@@ -262,7 +262,7 @@ lemma count_by_group_or_element_indicator
     rw [h1_split] at h1
     have p1_im : ∀ j ∈ s, {a | p1 a = j} ≃ B j := by 
       intro j hj
-      refine ⟨fun x => ⟨x.val.1.2.val, by 
+      refine ⟨fun x => ⟨x.val.1.2.val, by
                 have h := x.val.property
                 unfold E at h
                 rw [Finset.mem_def] at h
@@ -302,33 +302,31 @@ lemma count_by_group_or_element_indicator
     have hp2 : Set.MapsTo p2 (Finset.univ : Finset E)
       (Finset.univ : Finset (s.biUnion B)) := by simp
     have h2 := Finset.card_eq_sum_card_fiberwise hp2
-    have h2' : ∀ x, {a | p2 a = x} ≃ {j | j ∈ s ∧ ↑x ∈ B j} := by 
-      intro x
-      simp [p2,amb]
-      sorry
-
+    have h2' : ∀ x ∈ (s.biUnion B), {a | p2 a = x} ≃ {j | j ∈ s ∧ ↑x ∈ B j} := by 
+      intro x hx
+      simp [p2,amb] 
+      refine ⟨fun a => ⟨a.val.val.1, by
+                have h := a.val.property
+                unfold E at h
+                rw [Finset.mem_def] at h
+                simp at h 
+                have a' := a.property
+                rw[a'] at h
+                exact h⟩, 
+              fun j => ⟨⟨(j.val, ⟨x,hx⟩), by 
+                simp[E]
+                exact j.property⟩, by simp⟩, ?_, ?_⟩
+      · simp[Function.LeftInverse]
+        intro _ _ _ _ _ _ ha
+        exact ha.symm
+      · simp[Function.RightInverse, Function.LeftInverse]
     have h2'set : ∀ x ∈ (s.biUnion B),
       Finset.card {a | p2 a = x} = Finset.card {j | j ∈ s ∧ ↑x ∈ B j} := by 
         intro x hx
         apply Finset.card_eq_of_equiv
-        specialize h2' ⟨ x, hx ⟩ 
+        specialize h2' x hx
         simp at h2'
         simp
-        apply Equiv.trans (α := { a // ↑(p2 a) = x }) 
-          (γ := { j // j ∈ s ∧ x ∈ B j}) 
-          (β := { a // p2 a = ⟨x, hx⟩ })
-        have hl a: ↑(p2 a) = x ↔ p2 a = ⟨x, hx⟩ := by 
-          have h := Subtype.coe_eq_iff (a := p2 a) (b := x)
-          rw [h]
-          constructor 
-          · simp
-          · intro hp2a
-            use hx
-        conv =>
-          lhs 
-          congr
-          ext a
-          rw [hl a]
         exact h2'
     have h2'' := Finset.sum_congr
       (s₁ := s.biUnion B) (s₂ := s.biUnion B) (by rfl) h2'set
