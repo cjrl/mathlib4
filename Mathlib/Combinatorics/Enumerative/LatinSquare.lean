@@ -228,24 +228,24 @@ lemma count_by_group_or_element_indicator
     let p1 : E → ι := Prod.fst ∘ amb
     have hp1 : Set.MapsTo p1 (Finset.univ : Finset E) (Finset.univ : Finset ι) := by simp
     have h1 := Finset.card_eq_sum_card_fiberwise hp1
-    have j_not_in_s_zero_summand : ∀ j ∈ sᶜ, Finset.card {a | p1 a = j} = 0 := by 
+    have j_not_in_s_zero_summand : ∀ j ∈ sᶜ, Finset.card {a | p1 a = j} = 0 := by
       intro j hjc
       rw [Finset.card_eq_zero]
       ext b
-      constructor 
+      constructor
       · intro hm
         simp at hm
         simp [p1,amb] at hm
-        have hb := b.property 
+        have hb := b.property
         simp only [E] at hb
         rw [Finset.mem_def] at hb
         simp at hb
         have hj := hb.1
         rw [hm] at hj
-        simp at hjc 
+        simp at hjc
         contradiction
       · simp
-    have s_s_complement_disj : Disjoint s (sᶜ) := by 
+    have s_s_complement_disj : Disjoint s (sᶜ) := by
       simp [Disjoint]
       intro x hx hxc
       have h := Finset.subset_inter hx hxc
@@ -260,7 +260,7 @@ lemma count_by_group_or_element_indicator
     simp at h1_split
     simp at h1
     rw [h1_split] at h1
-    have p1_im : ∀ j ∈ s, {a | p1 a = j} ≃ B j := by 
+    have p1_im : ∀ j ∈ s, {a | p1 a = j} ≃ B j := by
       intro j hj
       refine ⟨fun x => ⟨x.val.1.2.val, by
                 have h := x.val.property
@@ -272,13 +272,13 @@ lemma count_by_group_or_element_indicator
                 dsimp [p1,amb] at j'
                 rw [j'] at h
                 exact h⟩,
-              fun x => ⟨⟨(j, ⟨x.val, by 
+              fun x => ⟨⟨(j, ⟨x.val, by
                 have h := x.property
                 rw [Finset.mem_biUnion]
-                use j ⟩), by simp [E]; exact hj ⟩, 
+                use j ⟩), by simp [E]; exact hj ⟩,
               by simp [p1,amb]⟩,
               ?left_inv,
-              ?right_inv⟩ 
+              ?right_inv⟩
       · simp [Function.LeftInverse]
         intros _ _ _ _ _ _ hp1
         simp [p1,amb] at hp1
@@ -302,18 +302,18 @@ lemma count_by_group_or_element_indicator
     have hp2 : Set.MapsTo p2 (Finset.univ : Finset E)
       (Finset.univ : Finset (s.biUnion B)) := by simp
     have h2 := Finset.card_eq_sum_card_fiberwise hp2
-    have h2' : ∀ x ∈ (s.biUnion B), {a | p2 a = x} ≃ {j | j ∈ s ∧ ↑x ∈ B j} := by 
+    have h2' : ∀ x ∈ (s.biUnion B), {a | p2 a = x} ≃ {j | j ∈ s ∧ ↑x ∈ B j} := by
       intro x hx
-      simp [p2,amb] 
+      simp [p2,amb]
       refine ⟨fun a => ⟨a.val.val.1, by
                 have h := a.val.property
                 unfold E at h
                 rw [Finset.mem_def] at h
-                simp at h 
+                simp at h
                 have a' := a.property
                 rw[a'] at h
-                exact h⟩, 
-              fun j => ⟨⟨(j.val, ⟨x,hx⟩), by 
+                exact h⟩,
+              fun j => ⟨⟨(j.val, ⟨x,hx⟩), by
                 simp[E]
                 exact j.property⟩, by simp⟩, ?_, ?_⟩
       · simp[Function.LeftInverse]
@@ -321,7 +321,7 @@ lemma count_by_group_or_element_indicator
         exact ha.symm
       · simp[Function.RightInverse, Function.LeftInverse]
     have h2'set : ∀ x ∈ (s.biUnion B),
-      Finset.card {a | p2 a = x} = Finset.card {j | j ∈ s ∧ ↑x ∈ B j} := by 
+      Finset.card {a | p2 a = x} = Finset.card {j | j ∈ s ∧ ↑x ∈ B j} := by
         intro x hx
         apply Finset.card_eq_of_equiv
         specialize h2' x hx
@@ -336,7 +336,7 @@ lemma count_by_group_or_element_indicator
     simp
     simp at h2
     have hfin : ∑ x ∈ (s.biUnion B).attach, {a ∈ E.attach | p2 a = x}.card =
-                ∑ x ∈ s.biUnion B, {a ∈ E.attach | ↑(p2 a) = x}.card := by 
+                ∑ x ∈ s.biUnion B, {a ∈ E.attach | ↑(p2 a) = x}.card := by
          have h := Finset.sum_attach (s.biUnion B) (fun x => {a ∈ E.attach | p2 a = x}.card )
          rw [<- h]
          congr
@@ -353,7 +353,7 @@ lemma exists_larger_subset
   {k : Nat} [nek : NeZero k]
   (h₁ : ∀ j, Finset.card (B j) = k)
   (h₂ : (s.biUnion B).card < (s.card)) :
-      ∃ (x : α), k < (Finset.card {j | j ∈ s ∧ x ∈ B j}) := by
+      ∃ x ∈ s.biUnion B, k < (Finset.card {j | j ∈ s ∧ x ∈ B j}) := by
       by_contra hc
       simp at hc
       have pullback : ∀ i ∈ (s.biUnion B),
@@ -364,17 +364,13 @@ lemma exists_larger_subset
       have hc' : (∀ i ∈ s.biUnion B, Finset.card {j | j ∈ s ∧ i ∈ B j} ≤ k) := by
         intro i
         intro h
-        specialize pullback i
-        apply pullback at h
-        obtain ⟨ x , hx ⟩ := h
-        specialize hc x
-        conv =>
-          lhs
-          congr
-          congr
-          ext
-          rw[hx]
-        exact hc
+        have h' := hc i
+        rw [ Finset.mem_biUnion ] at h
+        obtain ⟨ a, i ⟩ := h
+        specialize h' a
+        specialize h' i.left
+        specialize h' i.right
+        exact h'
       have g := Finset.sum_le_sum  (s := s.biUnion B) (ι := α)
         (f := fun x => Finset.card {j | j ∈ s ∧ x ∈ B j})
         (g := fun _ => k)
@@ -389,20 +385,18 @@ lemma exists_larger_subset
         assumption
       replace hc' : ∑ i ∈ s.biUnion B, Finset.card {j | j ∈ s ∧ i ∈ B j} < (s.card) * k := by omega
       have h' : ∑ j ∈ s, (Finset.card (B j)) =
-        ∑ x ∈ (s.biUnion B), Finset.card {j | j ∈ s ∧ x ∈ B j} := 
-        count_by_group_or_element_indicator B s 
+        ∑ x ∈ (s.biUnion B), Finset.card {j | j ∈ s ∧ x ∈ B j} :=
+        count_by_group_or_element_indicator B s
       rw[←h'] at hc'
       simp[h₁] at hc'
 
 
 lemma latin_rect_hall_property
   {k n : Nat} [NeZero k] [NeZero n]
-  {A : LatinRectangle k n α}
   {B : Fin n → Finset α}
-  {k : Nat}
   (h1 : k < n := by omega)
   (h2 : ∀ j, Finset.card (B j) = n - k)
-  (h3 : ∀ x ∈ symbols A.M, ∀ (t : Finset (Fin n)), Finset.card {j | j ∈ t ∧ x ∈ B j} ≤ n - k) :
+  (h3 : ∀ x, ∀ (t : Finset (Fin n)), Finset.card {j | j ∈ t ∧ x ∈ B j} ≤ n - k) :
   ∀ (s : Finset (Fin n)), (Finset.card s) ≤ (Finset.card (s.biUnion B)) := by
     intro s
     set l := s.card with hl
@@ -418,11 +412,7 @@ lemma latin_rect_hall_property
     have _ : NeZero (n-k) := {out := by omega}
     have hcount := exists_larger_subset h2 hc
     obtain ⟨ x, hx ⟩ := hcount
-    specialize h3
-    have hxsym : x ∈ symbols A.M := by
-      sorry -- suspicious
-    apply h3 at hxsym
-    specialize hxsym s
+    specialize h3 x s
     omega
 
 theorem latin_rectangle_extends
@@ -433,13 +423,13 @@ theorem latin_rectangle_extends
   let B := symbols_not_in A
   have ls_excl (i : Fin k) (j : Fin n) : A.M i j ∉ B j := by sorry
   have Bj_size (j : Fin n) : Finset.card (B j) = n-k := by sorry
-  have exact_i : ∀ x ∈ symbols A.M, ∀ (t : Finset (Fin n)),
+  have exact_i : ∀ x, ∀ (t : Finset (Fin n)),
     (Finset.card {j | j ∈ t ∧ x ∈ B j}) ≤ n-k := by
-    intro x hx t
+    intro x hx
     simp [B, symbols_not_in]
     -- Properties of latin rectangle
     sorry
-  let halls := hallMatchingsOn.nonempty (B) 
+  let halls := hallMatchingsOn.nonempty (B)
     (latin_rect_hall_property h Bj_size exact_i) (Finset.univ)
   set f := Classical.choice halls with hx
   simp [hallMatchingsOn] at f
