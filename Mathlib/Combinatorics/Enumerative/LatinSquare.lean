@@ -395,10 +395,35 @@ lemma exists_larger_subset
       simp[h₁] at hc'
 
 
-lemma hall_property
+lemma latin_rect_hall_property
+  {k n : Nat} [NeZero k] [NeZero n]
+  {A : LatinRectangle k n α}
   {B : Fin n → Finset α}
-  {h : ∃ k, ∀ j, Finset.card (B j) = k} :
-  ∀ (s : Finset (Fin n)), (Finset.card s) ≤ (Finset.card (s.biUnion B)) := by sorry
+  {k : Nat}
+  (h1 : k < n := by omega)
+  (h2 : ∀ j, Finset.card (B j) = n - k)
+  (h3 : ∀ x ∈ symbols A.M, ∀ (t : Finset (Fin n)), Finset.card {j | j ∈ t ∧ x ∈ B j} ≤ n - k) :
+  ∀ (s : Finset (Fin n)), (Finset.card s) ≤ (Finset.card (s.biUnion B)) := by
+    intro s
+    set l := s.card with hl
+    have h1 : ∑ j ∈ s, (Finset.card (B j)) = l*(n-k) := by
+      conv =>
+        congr
+        arg 2
+        ext j
+        rw [h2]
+      simp [hl]
+    by_contra hc
+    simp at hc
+    have _ : NeZero (n-k) := {out := by omega}
+    have hcount := exists_larger_subset h2 hc
+    obtain ⟨ x, hx ⟩ := hcount
+    specialize h3
+    have hxsym : x ∈ symbols A.M := by
+      sorry -- suspicious
+    apply h3 at hxsym
+    specialize hxsym s
+    omega
 
 theorem latin_rectangle_extends
   {k n : Nat} [NeZero k] [NeZero n]
@@ -414,29 +439,8 @@ theorem latin_rectangle_extends
     simp [B, symbols_not_in]
     -- Properties of latin rectangle
     sorry
-  have h : ∀ (s : Finset (Fin n)), (Finset.card s) ≤ (Finset.card (s.biUnion B)) := by
-    intro s
-    set l := s.card with hl
-    have h1 : ∑ j ∈ s, (Finset.card (B j)) = l*(n-k) := by
-      conv =>
-        congr
-        arg 2
-        ext j
-        rw [Bj_size]
-      simp [hl]
-    by_contra hc
-    simp at hc
-    have _ : NeZero (n-k) := {
-      out := by omega
-    }
-    have hcount := exists_larger_subset Bj_size hc
-    obtain ⟨ x, hx ⟩ := hcount
-    specialize exact_i x
-    have hxsym : x ∈ symbols A.M := by sorry
-    apply exact_i at hxsym
-    specialize hxsym s
-    omega
-  let halls := hallMatchingsOn.nonempty (B) h (Finset.univ)
+  let halls := hallMatchingsOn.nonempty (B) 
+    (latin_rect_hall_property h Bj_size exact_i) (Finset.univ)
   set f := Classical.choice halls with hx
   simp [hallMatchingsOn] at f
   obtain ⟨ f', hf⟩ := f
