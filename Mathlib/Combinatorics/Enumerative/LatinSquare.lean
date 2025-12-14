@@ -211,10 +211,14 @@ def is_subrect {m n m' n' : Nat}
   (h₂ : n ≤ n' := by omega) :=
   ∀ (i : Fin m), ∀ (j : Fin n), A.M i j = B.M ⟨i, by omega⟩ ⟨j, by omega⟩
 
+def row_map {k n : Nat} [NeZero k] [NeZero n]
+ (A : LatinRectangle k n α) (j : Fin n) :=
+ fun i => A.M i j
+
 def symbols_not_in
 {k n : Nat} [NeZero k] [NeZero n]
  (A : LatinRectangle k n α) (j : Fin n) :=
-  let D := Finset.image (fun i => A.M i j) Finset.univ
+  let D := Finset.image (row_map A j) Finset.univ
   (symbols A.M) \ D
 
 lemma count_by_group_or_element_indicator
@@ -415,14 +419,41 @@ lemma latin_rect_hall_property
     specialize h3 x s
     omega
 
+lemma row_map_in_symbols 
+    {k n : Nat} [NeZero k] [NeZero n]
+    (A : LatinRectangle k n α) :
+    ∀ j, (Finset.image (row_map A j) Finset.univ) ∩ (symbols A.M) 
+     = (Finset.image (row_map A j) Finset.univ) := by 
+     intro j
+     rw [Finset.inter_eq_left]
+     sorry
+     
+lemma row_card
+    {k n : Nat} [NeZero k] [NeZero n]
+    (A : LatinRectangle k n α)
+    (h : k < n := by omega) :
+    ∀ j, (Finset.image (row_map A j) Finset.univ).card = k := by 
+    sorry
+
+lemma card_symbols_not_in
+  {k n : Nat} [NeZero k] [NeZero n]
+    (A : LatinRectangle k n α)
+    (h : k < n := by omega) :
+  ∀ j, Finset.card (symbols_not_in A j) = n - k := by 
+    simp [symbols_not_in,
+          Finset.card_sdiff, 
+          A.exactly_n_symbols,
+          row_map_in_symbols,
+          row_card A]
+
 theorem latin_rectangle_extends
   {k n : Nat} [NeZero k] [NeZero n]
     (A : LatinRectangle k n α)
     (h : k < n := by omega) :
     ∃ (A' : LatinRectangle (k + 1) n α), is_subrect A A' := by
   let B := symbols_not_in A
-  have ls_excl (i : Fin k) (j : Fin n) : A.M i j ∉ B j := by sorry
-  have Bj_size (j : Fin n) : Finset.card (B j) = n-k := by sorry
+  have Bj_size (j : Fin n) : Finset.card (B j) = n-k := 
+    card_symbols_not_in A h j
   have exact_i : ∀ x, ∀ (t : Finset (Fin n)),
     (Finset.card {j | j ∈ t ∧ x ∈ B j}) ≤ n-k := by
     intro x hx
@@ -451,7 +482,5 @@ theorem latin_rectangle_extends
   rfl
 
 end Completion
-
-#check Finset.sum_le_sum
 
 end LatinSquare
