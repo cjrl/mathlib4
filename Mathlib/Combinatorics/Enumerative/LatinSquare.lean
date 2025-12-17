@@ -427,13 +427,30 @@ lemma col_map_in_symbols
      intro j
      unfold col_map symbols
      simp [Finset.inter_eq_left, Finset.subset_iff]
-     
+
+lemma col_injective
+    {k n : Nat} [NeZero k] [NeZero n]
+    (A : LatinRectangle k n α)
+    (h : k < n := by omega) :
+    ∀ j, Function.Injective (col_map A j) := by 
+    have h_col := A.distinct_col_entries
+    unfold distinct_col_entries at h_col
+    unfold Function.Injective col_map
+    intro j a1 a2
+    specialize h_col j a1 a2
+    replace h_col := h_col.mt
+    simp at h_col
+    exact h_col
+
 lemma col_card
     {k n : Nat} [NeZero k] [NeZero n]
     (A : LatinRectangle k n α)
     (h : k < n := by omega) :
     ∀ j, (Finset.image (col_map A j) Finset.univ).card = k := by 
-    sorry
+    intro j
+    have h_inj := col_injective A h j
+    simp [Finset.card_image_of_injective Finset.univ h_inj]
+    
 
 lemma card_symbols_not_in
   {k n : Nat} [NeZero k] [NeZero n]
@@ -442,17 +459,9 @@ lemma card_symbols_not_in
   ∀ j, Finset.card (symbols_not_in A j) = n - k := by
     simp [symbols_not_in,
           Finset.card_sdiff, 
-          A.exactly_n_symbols]
-    unfold symbols col_map
-    simp
-    
-    
-    
-    -- simp [symbols_not_in,
-    --       Finset.card_sdiff, 
-    --       A.exactly_n_symbols,
-    --       col_map_in_symbols,
-    --       col_card A]
+          A.exactly_n_symbols,
+          col_map_in_symbols,
+          col_card A]
 
 
 theorem latin_rectangle_extends
