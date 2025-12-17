@@ -211,14 +211,14 @@ def is_subrect {m n m' n' : Nat}
   (h₂ : n ≤ n' := by omega) :=
   ∀ (i : Fin m), ∀ (j : Fin n), A.M i j = B.M ⟨i, by omega⟩ ⟨j, by omega⟩
 
-def row_map {k n : Nat} [NeZero k] [NeZero n]
+def col_map {k n : Nat} [NeZero k] [NeZero n]
  (A : LatinRectangle k n α) (j : Fin n) :=
  fun i => A.M i j
 
 def symbols_not_in
 {k n : Nat} [NeZero k] [NeZero n]
  (A : LatinRectangle k n α) (j : Fin n) :=
-  let D := Finset.image (row_map A j) Finset.univ
+  let D := Finset.image (col_map A j) Finset.univ
   (symbols A.M) \ D
 
 lemma count_by_group_or_element_indicator
@@ -419,32 +419,41 @@ lemma latin_rect_hall_property
     specialize h3 x s
     omega
 
-lemma row_map_in_symbols 
+lemma col_map_in_symbols
     {k n : Nat} [NeZero k] [NeZero n]
     (A : LatinRectangle k n α) :
-    ∀ j, (Finset.image (row_map A j) Finset.univ) ∩ (symbols A.M) 
-     = (Finset.image (row_map A j) Finset.univ) := by 
+    ∀ j, (Finset.image (col_map A j) Finset.univ) ∩ (symbols A.M) 
+     = (Finset.image (col_map A j) Finset.univ) := by 
      intro j
-     rw [Finset.inter_eq_left]
-     sorry
+     unfold col_map symbols
+     simp [Finset.inter_eq_left, Finset.subset_iff]
      
-lemma row_card
+lemma col_card
     {k n : Nat} [NeZero k] [NeZero n]
     (A : LatinRectangle k n α)
     (h : k < n := by omega) :
-    ∀ j, (Finset.image (row_map A j) Finset.univ).card = k := by 
+    ∀ j, (Finset.image (col_map A j) Finset.univ).card = k := by 
     sorry
 
 lemma card_symbols_not_in
   {k n : Nat} [NeZero k] [NeZero n]
     (A : LatinRectangle k n α)
     (h : k < n := by omega) :
-  ∀ j, Finset.card (symbols_not_in A j) = n - k := by 
+  ∀ j, Finset.card (symbols_not_in A j) = n - k := by
     simp [symbols_not_in,
           Finset.card_sdiff, 
-          A.exactly_n_symbols,
-          row_map_in_symbols,
-          row_card A]
+          A.exactly_n_symbols]
+    unfold symbols col_map
+    simp
+    
+    
+    
+    -- simp [symbols_not_in,
+    --       Finset.card_sdiff, 
+    --       A.exactly_n_symbols,
+    --       col_map_in_symbols,
+    --       col_card A]
+
 
 theorem latin_rectangle_extends
   {k n : Nat} [NeZero k] [NeZero n]
