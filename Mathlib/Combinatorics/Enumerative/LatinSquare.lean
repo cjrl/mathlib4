@@ -472,14 +472,34 @@ theorem latin_rectangle_extends
   let B := symbols_not_in A
   have Bj_size (j : Fin n) : Finset.card (B j) = n-k := 
     card_symbols_not_in A h j
-  have exact_i : ∀ x, ∀ (t : Finset (Fin n)),
-    (Finset.card {j | j ∈ t ∧ x ∈ B j}) ≤ n-k := by
-    intro x hx
-    simp [B, symbols_not_in]
-    -- Properties of latin rectangle
+  have Bj_characterized (j : Fin n) (x : α) : x ∈ B j ↔ ¬ (∃ i, A.M i j = x)  := by sorry
+  have exactly_n_minus_k_cols_without_x : ∀ x, (Finset.card {j | x ∈ B j}) = n-k := by 
+    -- Uses properties of latin rectangle
+    intro x
+    conv =>
+      lhs
+      congr
+      congr
+      ext j
+      rw [Bj_characterized j]
+    simp
+    -- There are n-k columns that do not have an x
     sorry
+
+  have pre_property_H : ∀ x, ∀ (t : Finset (Fin n)),
+    (Finset.card {j | j ∈ t ∧ x ∈ B j}) ≤ n-k := by
+    intro x t
+    have h : {j | j ∈ t ∧ x ∈ B j} ⊆ {j | x ∈ B j} := by simp
+    have h' := Finset.card_le_card (s := {j | j ∈ t ∧ x ∈ B j}) (t := {j | x ∈ B j}) 
+    have hx := exactly_n_minus_k_cols_without_x x
+    simp at hx
+    rw[hx] at h'
+    -- Should be
+    -- exact h' h
+    sorry
+
   let halls := hallMatchingsOn.nonempty (B)
-    (latin_rect_hall_property h Bj_size exact_i) (Finset.univ)
+    (latin_rect_hall_property h Bj_size pre_property_H) (Finset.univ)
   set f := Classical.choice halls with hx
   simp [hallMatchingsOn] at f
   obtain ⟨ f', hf⟩ := f
