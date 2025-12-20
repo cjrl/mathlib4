@@ -215,11 +215,27 @@ def col_map {k n : Nat} [NeZero k] [NeZero n]
  (A : LatinRectangle k n α) (j : Fin n) :=
  fun i => A.M i j
 
+def symbols_in
+{k n : Nat} [NeZero k] [NeZero n]
+ (A : LatinRectangle k n α) (j : Fin n) :=
+  let D := Finset.image (col_map A j) Finset.univ
+  D
+
 def symbols_not_in
 {k n : Nat} [NeZero k] [NeZero n]
  (A : LatinRectangle k n α) (j : Fin n) :=
   let D := Finset.image (col_map A j) Finset.univ
   (symbols A.M) \ D
+  
+lemma symbols_in_count 
+{k n : Nat} [NeZero k] [NeZero n]
+ (A : LatinRectangle k n α) (j : Fin n) : 
+ Finset.card (symbols_in A j) = k := by sorry
+ 
+lemma symbols_in_and_not_in_disjoint 
+{k n : Nat} [NeZero k] [NeZero n]
+ (A : LatinRectangle k n α) (j : Fin n) : 
+ (symbols_in A j) ∩ (symbols_not_in A j) = ∅ := by sorry
 
 lemma count_by_group_or_element_indicator
   {ι : Type*} [Fintype ι] [DecidableEq ι]
@@ -474,22 +490,28 @@ theorem latin_rectangle_extends
   have Bj_characterized (j : Fin n) (x : α) : x ∈ B j ↔ ¬ (∃ i, A.M i j = x)  := by sorry
   have exactly_n_minus_k_cols_without_x : ∀ x, (Finset.card {j | x ∈ B j}) = n-k := by 
     -- Uses properties of latin rectangle
+    -- intro x
+    -- conv =>
+    --   lhs
+    --   congr
+    --   congr
+    --   ext j
+    --   rw [Bj_characterized j]
     intro x
-    conv =>
-      lhs
-      congr
-      congr
-      ext j
-      rw [Bj_characterized j]
-    -- (A = {j | A.M i j = x}) ∪ {B j x} = symbols 
-    -- A ∩ {B j x} = ∅ 
-    -- |A| = k and |A ∪ B| = n
-    -- QED
-    
-   
-    
+    set As : Finset (Fin n) := {j | ∃ i, A.M i j = x} with hA
+    set Bs : Finset (Fin n) := {j | x ∈ B j} with hB
+    have h_As_card : Finset.card As = k := by sorry
+    have h_union : As ∪ Bs = Fin n := by sorry
+    have h_union_card : Finset.card (As ∪ Bs) = n := by sorry
+    have h_intersect : As ∩ Bs = ∅ := by 
+      ext
+      sorry
+      
+    have h_card := Finset.card_union As Bs
+    simp [h_union_card, h_As_card, h_intersect] at h_card
+    omega
     -- There are n-k columns that do not have an x
-    sorry
+
 
   have pre_property_H : ∀ x, ∀ (t : Finset (Fin n)),
     (Finset.card {j | j ∈ t ∧ x ∈ B j}) ≤ n-k := by
