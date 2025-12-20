@@ -481,7 +481,13 @@ theorem latin_rectangle_extends
       congr
       ext j
       rw [Bj_characterized j]
-    simp
+    -- (A = {j | A.M i j = x}) ∪ {B j x} = symbols 
+    -- A ∩ {B j x} = ∅ 
+    -- |A| = k and |A ∪ B| = n
+    -- QED
+    
+   
+    
     -- There are n-k columns that do not have an x
     sorry
 
