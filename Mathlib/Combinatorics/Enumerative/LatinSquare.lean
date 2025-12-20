@@ -463,7 +463,6 @@ lemma card_symbols_not_in
           col_map_in_symbols,
           col_card A]
 
-
 theorem latin_rectangle_extends
   {k n : Nat} [NeZero k] [NeZero n]
     (A : LatinRectangle k n α)
@@ -489,14 +488,13 @@ theorem latin_rectangle_extends
   have pre_property_H : ∀ x, ∀ (t : Finset (Fin n)),
     (Finset.card {j | j ∈ t ∧ x ∈ B j}) ≤ n-k := by
     intro x t
-    have h : {j | j ∈ t ∧ x ∈ B j} ⊆ {j | x ∈ B j} := by simp
+    have h : ({j | j ∈ t ∧ x ∈ B j} : Finset (Fin n)) ⊆ ({j | x ∈ B j} : Finset (Fin n)) := by
+      simp [Finset.subset_iff]
     have h' := Finset.card_le_card (s := {j | j ∈ t ∧ x ∈ B j}) (t := {j | x ∈ B j}) 
     have hx := exactly_n_minus_k_cols_without_x x
     simp at hx
     rw[hx] at h'
-    -- Should be
-    -- exact h' h
-    sorry
+    exact h' h
 
   let halls := hallMatchingsOn.nonempty (B)
     (latin_rect_hall_property h Bj_size pre_property_H) (Finset.univ)
