@@ -168,8 +168,6 @@ def group_to_cayley_table {G : Type*} [DecidableEq G] [Group G] [Fintype G]
       simp at hia
       rw [<- hia]
       simp
-  }
-
 -- Cyclic Example
 -- We construct an infinite family of Latin Squares from the infinite family of Cyclic Groups
 
@@ -479,6 +477,23 @@ lemma card_symbols_not_in
           col_map_in_symbols,
           col_card A]
 
+lemma row_entry_to_column_entry
+  {k n : Nat} [NeZero k] [NeZero n]
+    (A : LatinRectangle k n α)
+    (x : α)
+    (h : k < n := by omega) :
+    ∃ f : Fin k → Fin n, 
+    ∀ {a : Fin k} {b : Fin n}, LatinRectangle.M a b = x ↔ f a = b := by
+      have hrow := A.once_per_row
+      unfold once_per_row at hrow
+      rw[forall_swap] at hrow
+      specialize hrow x
+      have hx : x ∈ symbols A.M := by sorry -- garbage only for sake of argument
+      rw [← imp_forall_iff] at hrow
+      specialize hrow hx
+      rw [ forall_existsUnique_iff] at hrow
+      exact hrow
+     
 theorem latin_rectangle_extends
   {k n : Nat} [NeZero k] [NeZero n]
     (A : LatinRectangle k n α)
@@ -497,11 +512,33 @@ theorem latin_rectangle_extends
     --   congr
     --   ext j
     --   rw [Bj_characterized j]
+
     intro x
     set As : Finset (Fin n) := {j | ∃ i, A.M i j = x} with hA
     set Bs : Finset (Fin n) := {j | x ∈ B j} with hB
-    have h_As_card : Finset.card As = k := by sorry
-    have h_union : As ∪ Bs = Fin n := by sorry
+    set Cs : Finset (Fin k) := {i | ∃ j, A.M i j = x} with hC
+    set Ds := {(i,j) | A.M i j = x} with hD
+    have h := row_entry_to_column_entry A x
+    obtain ⟨f, hf⟩ := h
+    have h_Cs_card : Finset.card Cs = k := by
+      unfold Cs
+      obtain ⟨f, hf⟩ := row_entry_to_column_entry A x
+      simp [hf]
+    have h_Cs_bij_h_Bs : Cs ≃ Bs := by
+      refine ⟨?toF, ?invF, ?_, ?_⟩ 
+      · exact fun i => ⟨f i, sorry⟩
+      · exact fun p => ⟨p.fst, sorry⟩ 
+      · sorry
+      · sorry
+    have h_As_card : Finset.card As = k := by 
+      unfold As
+      have hrow := A.once_per_row
+      unfold once_per_row at hrow
+      have hcol := A.distinct_col_entries
+      unfold distinct_col_entries at hcol
+      
+      sorry
+    -- have h_union : As ∪ Bs = Fin n := by sorry
     have h_union_card : Finset.card (As ∪ Bs) = n := by sorry
     have h_intersect : As ∩ Bs = ∅ := by 
       ext
