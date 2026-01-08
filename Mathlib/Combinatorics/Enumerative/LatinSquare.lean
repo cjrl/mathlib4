@@ -1,5 +1,5 @@
 /-
-Copyright (c) 2025 Christopher J. R. Lloyd and George H. Seelinger. All rights reserved.
+Copyright (c) 2026 Christopher J. R. Lloyd and George H. Seelinger. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Christopher J. R. Lloyd, George H. Seelinger
 -/
@@ -45,129 +45,141 @@ Description of Latin Squares
 
 section LatinSquare
 
-universe u
+universe u u' v
 
-variable {α : Type u} [DecidableEq α]
-variable {m n : Nat} [NeZero n]
+variable {m m' : Type u} [Fintype m] [Fintype m'] --[DecidableEq α]
+variable {n n' : Type u'} [Fintype n] [Fintype n']--[DecidableEq α]
+variable {α β : Type v} [Fintype α] [DecidableEq α] [Fintype β] [DecidableEq β]
 
-abbrev symbols (M : Fin m → Fin n → α) : Finset α :=
-  (Finset.image fun (x,y) ↦ M x y) Finset.univ
+-- abbrev symbols (M : Fin m → Fin n → α) : Finset α :=
+--   (Finset.image fun (x,y) ↦ M x y) Finset.univ
 
-abbrev exactly_n_symbols (M : Fin m → Fin n → α) :=
-  (symbols M).card = n
+-- abbrev exactly_n_symbols (M : Fin m → Fin n → α) :=
+--   (symbols M).card = n
 
-abbrev once_per_row (M : Fin m → Fin n → α) : Prop :=
-  ∀ i : Fin m, ∀ y ∈ symbols M, ∃! j: Fin n, M i j = y
+abbrev once_per_row (M : Matrix m n α) : Prop :=
+  ∀ i : m, ∀ y : α, ∃! j: n, M i j = y
 
-abbrev distinct_col_entries (M : Fin m → Fin n → α) : Prop :=
-  ∀ y : Fin n, ∀ x₁ x₂ : Fin m, x₁ ≠ x₂ → M x₁ y ≠ M x₂ y
+abbrev distinct_col_entries (M : Matrix m n α) : Prop :=
+  ∀ y : n, ∀ x₁ x₂ : m, x₁ ≠ x₂ → M x₁ y ≠ M x₂ y
 
-abbrev distinct_row_entries (M : Fin m → Fin n → α) : Prop :=
-  ∀ x : Fin m, ∀ y₁ y₂ : Fin n, y₁ ≠ y₂ → M x y₁ ≠ M x y₂
+abbrev distinct_row_entries (M : Matrix m n α) : Prop :=
+  ∀ x : m, ∀ y₁ y₂ : n, y₁ ≠ y₂ → M x y₁ ≠ M x y₂
 
 /-- For m ≤ n, an m × n Latin rectangle is a partial n × n Latin Square where
     the first m entries are filled. -/
-class LatinRectangle (m n : Nat) (α : Type u) [DecidableEq α] where
+class LatinRectangle (m : Type u) (n : Type u') (α : Type v)
+  [Fintype m] [Fintype n] [Fintype α] [DecidableEq α] where
   /-- An m × n array of symbols. -/
-  M : Fin m -> Fin n -> α
+  M : Matrix m n α
   /-- An $m × n$ Latin rectangle contains $n$ distinct entries. -/
-  exactly_n_symbols : exactly_n_symbols M
+  exactly_n_symbols : Fintype.card α = Fintype.card n
   /-- Each row contains each symbol exactly once. -/
   once_per_row : once_per_row M
   /-- Entries cannot repeat in a given column. -/
   distinct_col_entries : distinct_col_entries M
-  m_le_n : m ≤ n := by simp
+  m_le_n : Fintype.card m ≤ Fintype.card n := by simp
 
 -- Pretty printing of rectangles
-instance {m n : Nat} {α : Type u} [DecidableEq α] [ToString α] :
-  Repr (LatinRectangle m n α) where
+instance {m n : Nat} {α : Type u} [DecidableEq α] [Fintype α] [ToString α] :
+  Repr (LatinRectangle (Fin m) (Fin n) α) where
     reprPrec L _ :=
       let row (i : Fin m) :=
         String.intercalate " " (List.ofFn (fun j => (toString (L.M i j))));
       String.intercalate "\n" (List.ofFn row)
 
-abbrev once_per_column (M : Fin n → Fin n → α) : Prop :=
-  ∀ j : Fin n, ∀ x ∈ symbols M, ∃! i : Fin n, M i j = x
+abbrev once_per_column (M : Matrix m n α) : Prop :=
+  ∀ j : n, ∀ x : α, ∃! i : m, M i j = x
 
-omit [NeZero n]
 lemma latin_square_row_implies_latin_rectangle_row
-  (M : Fin n → Fin n → α)
-  (h₁ : exactly_n_symbols M)
+  (M : Matrix n n α)
   (h₂ : once_per_row M) :
-  (∀ (x : Fin n), ∀ (y₁ y₂ : Fin n), y₁ ≠ y₂ → ((M x y₁) ≠ (M x y₂))) := by sorry
+  (∀ (x : n), ∀ (y₁ y₂ : n), y₁ ≠ y₂ → ((M x y₁) ≠ (M x y₂))) := by sorry
 
-omit [NeZero n]
 lemma latin_square_col_implies_latin_rectangle_col
-  (M : Fin n → Fin n → α)
-  (h₁ : exactly_n_symbols M)
+  (M : Matrix n n α)
   (h₂ : once_per_column M) :
-  (∀ (y : Fin n), ∀ (x₁ x₂ : Fin n), x₁ ≠ x₂ → ((M x₁ y) ≠ (M x₂ y))) := by sorry
+  (∀ (y : n), ∀ (x₁ x₂ : n), x₁ ≠ x₂ → ((M x₁ y) ≠ (M x₂ y))) := by sorry
 
 /-- A LatinSquare is an n × n array containing exactly n symbols,
     each occurring exactly once in each row and exactly once in each column. -/
-class LatinSquare (n : Nat) (α : Type u) [DecidableEq α] extends LatinRectangle n n α where
+class LatinSquare (n : Type u) (α : Type v) [Fintype n] [Fintype α] [DecidableEq α]
+  extends LatinRectangle n n α where
   /-- Each column contains each symbol exactly once. -/
   once_per_column : once_per_column M
   /-- If each column contains each symbol exactly once, then there are no repeats across columns. -/
   distinct_col_entries := latin_square_col_implies_latin_rectangle_col
-    M exactly_n_symbols once_per_column
+    M once_per_column
   m_le_n := by rfl
 
-instance {n : Nat} {α : Type*} [DecidableEq α] [ToString α] :
-  Repr (LatinSquare n α) where
+instance {n : Nat} {α : Type v} [DecidableEq α] [Fintype α] [ToString α] :
+  Repr (LatinSquare (Fin n) α) where
     reprPrec L prec := Repr.reprPrec L.toLatinRectangle prec
 
 /-- Every Finite Group's Cayley table is an example of a Latin Square. -/
 @[to_additive]
-def group_to_cayley_table {G : Type*} [DecidableEq G] [Group G] [Fintype G]
-  {n : Nat} [NeZero n]
-  (ordering : Fin n ≃ G)
-  (h : n = Fintype.card G := by simp) :
-  LatinSquare n G := {
-    M := fun i j ↦ (ordering i) * (ordering j),
-    exactly_n_symbols := by
-      simp [exactly_n_symbols,symbols]
-      conv =>
-        rhs
-        rw [h]
-      congr
-      ext a
-      constructor
-      · simp
-      · intro h'
-        rw [Finset.mem_image]
-        set i' := ordering.symm a
-        set j' := ordering.symm 1
-        use (i',j')
-        simp [i', j']
+def group_to_cayley_table {G : Type*} [DecidableEq G] [Group G] [Fintype G] :
+  LatinSquare G G := {
+    M := fun i j ↦ i * j,
+    exactly_n_symbols := by rfl,
     once_per_row := by
       simp [once_per_row]
-      intro i g x y z
-      set g' := ordering i
-      set j := ordering.symm (g'⁻¹*g)
+      intro i y
+      set j := i⁻¹ * y
       use j
-      simp [g',j]
-      intro k h'
-      have hia : (ordering i)⁻¹ * ((ordering i) * (ordering k)) = (ordering i)⁻¹ * g := by
-       rw [mul_right_inj (ordering i)⁻¹ (b := (ordering i)*(ordering k)) (c := g)]
-       exact h'
-      simp at hia
-      rw [<- hia]
-      simp
+      simp [j]
+      intro z hz
+      rw [← mul_right_inj i⁻¹ (b := i*z) (c := y)] at hz
+      simp at hz
+      exact hz,
     once_per_column := by
       simp [once_per_column]
-      intro i g x y z
-      set g' := ordering i
-      set j := ordering.symm (g*g'⁻¹)
-      use j
-      simp [g',j]
-      intro k h'
-      have hia : (ordering k) * (ordering i) * (ordering i)⁻¹ = g * (ordering i)⁻¹  := by
-       rw [mul_left_inj (ordering i)⁻¹ (b := (ordering k)*(ordering i)) (c := g)]
-       exact h'
-      simp at hia
-      rw [<- hia]
-      simp
+      intro j x
+      set i := x*j⁻¹
+      use i
+      simp [i]
+      intro y hy
+      rw [← mul_left_inj j⁻¹ (b := y*j) (c := x)] at hy
+      simp at hy
+      exact hy
+   }
+   
+def latin_rectangle_isomorphism
+  (f : m ≃ m')
+  (g : n ≃ n')
+  (h : α ≃ β)
+  (A : LatinRectangle m n α) : 
+  LatinRectangle m' n' β := {
+  M := fun i' j' ↦ h (A.M (f.symm i') (g.symm j')),
+  exactly_n_symbols := by 
+    have g' : Fintype.card n = Fintype.card n' := Fintype.card_congr g
+    have h' : Fintype.card α = Fintype.card β := Fintype.card_congr h
+    have k' := A.exactly_n_symbols
+    omega,
+  once_per_row := by 
+    have h' := A.once_per_row
+    unfold once_per_row at h'
+    unfold once_per_row
+    intro i' b' 
+    specialize h' (f.symm i') (h.symm b')
+    obtain ⟨j, hj⟩ := h'
+    refine ⟨g j, ?_, ?_⟩
+    · have hj1 := hj.1
+      apply Equiv.congr_arg (f := h) at hj1
+      simp [hj1]
+    · intro y
+      have hj2 := hj.2
+      specialize hj2 (g.symm y) 
+      intro hy
+      apply Equiv.congr_arg (f := h.symm) at hy
+      simp only [Equiv.symm_apply_apply] at hy
+      have h2 := hj2 hy
+      apply Equiv.congr_arg (f := g) at h2
+      simp only [Equiv.apply_symm_apply] at h2
+      exact h2,
+  distinct_col_entries := by sorry,
+  m_le_n := by sorry
+  }
 -- Cyclic Example
 -- We construct an infinite family of Latin Squares from the infinite family of Cyclic Groups
 
