@@ -985,6 +985,10 @@ theorem card_eq_sum_card_image [DecidableEq M] (f : ι → M) (s : Finset ι) :
     #s = ∑ b ∈ s.image f, #{a ∈ s | f a = b} :=
   card_eq_sum_card_fiberwise fun _ => mem_image_of_mem _
 
+#check Finset.sdiff_eq_self_of_disjoint
+#check Finset.disjoint_right
+#check Finset.compl_eq_univ_sdiff
+
 /-- Given a finite collection of finite subsets $B_1, \ldots, B_k$ and, for every
 $x \in \bigcup_i B_i$, let $C_x$ be the set of indices of the $B_i$'s that contain $x$.
 Then, $\sum_i |B_i| = \sum_x |C_x|$. -/
@@ -1018,12 +1022,7 @@ lemma count_by_group_or_element_indicator
       simp at hjc
       contradiction
     · simp
-  have s_s_complement_disj : Disjoint s (sᶜ) := by
-    simp only [Disjoint, Finset.le_eq_subset, Finset.bot_eq_empty, Finset.subset_empty]
-    intro x hx hxc
-    have h := Finset.subset_inter hx hxc
-    simp only [Finset.inter_compl, Finset.subset_empty] at h
-    exact h
+  have s_s_complement_disj : Disjoint s (sᶜ) := disjoint_compl_right
   have h₁_split := Finset.sum_union s_s_complement_disj (f := fun j => Finset.card {a | p1 a = j})
   replace j_not_in_s_zero_summand := Finset.sum_congr (by rfl) j_not_in_s_zero_summand
   conv at j_not_in_s_zero_summand =>
