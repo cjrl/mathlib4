@@ -1124,7 +1124,7 @@ lemma count_by_group_or_element_indicator
   rw [← hfin]
   exact h₂
 
--- lemma biunion_fixed_card_card 
+-- lemma biunion_fixed_card_card
 --     {n : Type*} [DecidableEq n] [Fintype n]
 --     {α : Type*} [DecidableEq α]
 --     {B : n → Finset α}
